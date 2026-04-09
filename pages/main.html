@@ -3151,6 +3151,7 @@
         ═══════════════════════════════════════════ */
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
         import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
         /* ═══════════════════════════════════════════
@@ -3258,7 +3259,10 @@
         ═══════════════════════════════════════════ */
         const raycasterTargets = [];
         const eqInfoCardObjects = []; // 설비별 정보 카드 CSS2DObject 참조 배열
+        const dracoLoader = new DRACOLoader();
+        dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
         const loader = new GLTFLoader();
+        loader.setDRACOLoader(dracoLoader);
 
         // ── Equipment Name Tags (선언을 로더 밖으로 이동 — selectGLBMesh에서도 참조) ──
         const equipmentTags = [
@@ -3276,7 +3280,7 @@
             { mesh: 'HPRO', id: 'HR-201', name: 'HPRO', kpi: '회수율 60%', pct: 0.60, color: '#3978B8', type: 'bar' },
         ];
 
-        loader.load('../models/seperated.glb', function (gltf) {
+        loader.load('../models/seperated_comp.glb', function (gltf) {
             const model = gltf.scene;
 
             model.traverse((child) => {

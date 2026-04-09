@@ -3,3 +3,7 @@ demo_standalone.html
 
 # Claude Code 로컬 설정
 .claude/
+
+# 대용량 3D 모델 (GitHub 100MB 제한 초과)
+models/concept.glb
+models/seperated.glb
