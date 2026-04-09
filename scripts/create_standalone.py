@@ -60,6 +60,16 @@ if os.path.exists(NAVBAR_JS_PATH):
 else:
     print(f"\n⚠  shared-navbar.js 파일 없음 (건너뜀)")
 
+# ── version.js 인라인 로딩 ────────────────────────────────────────────────
+VERSION_JS_PATH = os.path.join(SCRIPT_DIR, 'version.js')
+version_js_content = ''
+if os.path.exists(VERSION_JS_PATH):
+    with open(VERSION_JS_PATH, 'r', encoding='utf-8') as f:
+        version_js_content = f.read()
+    print(f"▶  version.js 로드 완료")
+else:
+    print(f"⚠  version.js 파일 없음 (건너뜀)")
+
 
 def embed_images(html: str, base_dir: str) -> str:
     """로컬 이미지(src="...") 파일을 Base64 data URI로 교체"""
@@ -97,6 +107,13 @@ def inline_navbar_js(html: str) -> str:
     # 레거시 패턴도 처리
     html = html.replace('<script src="shared-navbar.js"></script>', inline_tag)
     html = html.replace("<script src='shared-navbar.js'></script>", inline_tag)
+
+    # version.js 인라인 삽입
+    if version_js_content:
+        ver_tag = f'<script>\n{version_js_content}\n</script>'
+        html = html.replace('<script src="../scripts/version.js"></script>', ver_tag)
+        html = html.replace('<script src="version.js"></script>', ver_tag)
+
     return html
 
 
