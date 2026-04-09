@@ -2979,7 +2979,7 @@
                     <input type="checkbox" class="lp-cb" checked>
                     <span class="lp-checkmark"></span>
                     <span class="lp-dot" style="background:#50B8B8;"></span>
-                    <span class="lp-name">설비별 정보 카드</span>
+                    <span class="lp-name">설비 정보</span>
                     <span class="lp-sub">Equipment Info</span>
                 </div>
                 <div class="lp-row" data-group="overlay" onclick="onLayerChange(this, 'overlay')">
@@ -3738,13 +3738,17 @@
         let isDragging = false;
         let mouseDownPos = { x: 0, y: 0 };
 
+        let radialWasActive = false;
+
         renderer.domElement.addEventListener('pointerdown', e => {
             mouseDownPos = { x: e.clientX, y: e.clientY };
             isDragging = false;
+            radialWasActive = radialMenu.classList.contains('active');
 
-            if (e.button === 0) {
+            const panelOpen = !panel.classList.contains('hidden');
+            if (e.button === 0 && !panelOpen) {
                 camState.isPanning = true;   // 좌클릭 → 이동
-            } else if (e.button === 1) {
+            } else if (e.button === 1 && !panelOpen) {
                 camState.isLooking = true;   // 휠클릭 → 회전
             }
             renderer.domElement.setPointerCapture(e.pointerId);
@@ -3778,6 +3782,9 @@
 
             if (isDragging) return;
 
+            // pointerdown 시점에 래디얼 메뉴가 활성 상태였으면 3D 모델 클릭 무시
+            if (radialWasActive) return;
+
             // Interaction Raycast
             const rect = renderer.domElement.getBoundingClientRect();
             mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
@@ -3794,7 +3801,8 @@
 
         // Wheel Zoom (Dolly)
         renderer.domElement.addEventListener('wheel', e => {
-            if (!zooming) {
+            const panelOpen = !panel.classList.contains('hidden');
+            if (!zooming && !panelOpen) {
                 const delta = Math.sign(e.deltaY);
                 // Move camera backwards (positive Z local) or forwards (negative Z local)
                 camera.translateZ(delta * camState.zoomSpeed * 20); // adjustable factor
@@ -3946,7 +3954,6 @@
                     }
                 };
                 g.addEventListener('click', onSliceClick);
-                g.addEventListener('pointerdown', onSliceClick);
             });
         }
         initRadialMenu();
