@@ -54,7 +54,7 @@
         return `
         <nav id="dock">
             <div class="dock-inner">
-                <img src="main_ci.png" alt="PROMISE" style="height:34px;object-fit:contain;flex-shrink:0;margin-right:6px;">
+                <img src="../assets/main_ci.png" alt="PROMISE" style="height:34px;object-fit:contain;flex-shrink:0;margin-right:6px;">
                 <div class="tb-sep"></div>
                 ${items}
                 <div class="dock-spacer"></div>

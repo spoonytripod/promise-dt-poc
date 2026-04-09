@@ -18,19 +18,22 @@ import os
 import re
 import sys
 
-# ── 경로 설정 (스크립트 위치 기준 자동 감지) ──────────────────────────────
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# ── 경로 설정 (스크립트 위치 기준 → 프로젝트 루트) ────────────────────────
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(SCRIPT_DIR)
+PAGES_DIR = os.path.join(ROOT_DIR, 'pages')
+ASSETS_DIR = os.path.join(ROOT_DIR, 'assets')
 
 # ── 번들 대상 HTML 파일 자동 수집 ─────────────────────────────────────────
-# demo_standalone.html 은 출력 파일이므로 제외
 EXCLUDE_FILES = {'demo_standalone.html'}
 
 html_files = sorted([
-    f for f in os.listdir(BASE_DIR)
+    f for f in os.listdir(PAGES_DIR)
     if f.endswith('.html') and f not in EXCLUDE_FILES
 ])
 
-print(f"▶  BASE_DIR: {BASE_DIR}")
+print(f"▶  ROOT_DIR: {ROOT_DIR}")
+print(f"▶  PAGES_DIR: {PAGES_DIR}")
 print(f"▶  발견된 HTML 파일 ({len(html_files)}개):")
 for f in html_files:
     print(f"   • {f}")
@@ -44,11 +47,11 @@ FILES = {make_page_id(f): f for f in html_files}
 # 네비게이션 패치 맵: 파일명 → 페이지 ID
 NAV_MAP = {filename: page_id for page_id, filename in FILES.items()}
 
-GLB_PATH    = os.path.join(BASE_DIR, 'models', 'concept.glb')
-OUTPUT_PATH = os.path.join(BASE_DIR, 'demo_standalone.html')
+GLB_PATH    = os.path.join(ROOT_DIR, 'models', 'concept.glb')
+OUTPUT_PATH = os.path.join(ROOT_DIR, 'demo_standalone.html')
 
 # ── shared-navbar.js 인라인 로딩 ──────────────────────────────────────────
-NAVBAR_JS_PATH = os.path.join(BASE_DIR, 'shared-navbar.js')
+NAVBAR_JS_PATH = os.path.join(SCRIPT_DIR, 'shared-navbar.js')
 navbar_js_content = ''
 if os.path.exists(NAVBAR_JS_PATH):
     with open(NAVBAR_JS_PATH, 'r', encoding='utf-8') as f:
@@ -89,6 +92,9 @@ def inline_navbar_js(html: str) -> str:
         return html
     inline_tag = f'<script>\n{navbar_js_content}\n</script>'
     # src 속성의 따옴표 종류에 관계없이 교체
+    html = html.replace('<script src="../scripts/shared-navbar.js"></script>', inline_tag)
+    html = html.replace("<script src='../scripts/shared-navbar.js'></script>", inline_tag)
+    # 레거시 패턴도 처리
     html = html.replace('<script src="shared-navbar.js"></script>', inline_tag)
     html = html.replace("<script src='shared-navbar.js'></script>", inline_tag)
     return html
@@ -113,7 +119,7 @@ def patch_nav(html: str) -> str:
 processed = {}
 
 for page_id, filename in FILES.items():
-    path = os.path.join(BASE_DIR, filename)
+    path = os.path.join(PAGES_DIR, filename)
     if not os.path.exists(path):
         print(f"\n⚠  {filename} 파일 없음, 건너뜀")
         continue
@@ -122,8 +128,8 @@ for page_id, filename in FILES.items():
     with open(path, 'r', encoding='utf-8') as f:
         html = f.read()
 
-    # 로컬 이미지 임베드
-    html = embed_images(html, BASE_DIR)
+    # 로컬 이미지 임베드 (pages/ 기준 상대경로 해석)
+    html = embed_images(html, PAGES_DIR)
 
     # shared-navbar.js 인라인 삽입
     html = inline_navbar_js(html)
@@ -134,8 +140,10 @@ for page_id, filename in FILES.items():
         with open(GLB_PATH, 'rb') as f:
             glb_b64 = base64.b64encode(f.read()).decode('ascii')
         glb_uri = f"data:application/octet-stream;base64,{glb_b64}"
-        old = "loader.load('models/concept.glb'"
-        html = html.replace(old, f"loader.load('{glb_uri}'")
+        # 새 경로 (../models/) 및 레거시 경로 (models/) 모두 처리
+        html = html.replace("loader.load('../models/concept.glb'", f"loader.load('{glb_uri}'")
+        html = html.replace("loader.load('../models/seperated.glb'", f"loader.load('{glb_uri}'")
+        html = html.replace("loader.load('models/concept.glb'", f"loader.load('{glb_uri}'")
         print(f"  [embed] GLB ({len(glb_b64) // 1024} KB)")
     elif page_id == 'main':
         print(f"  [skip] GLB 파일 없음: {GLB_PATH}")

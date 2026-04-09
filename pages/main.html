@@ -3007,7 +3007,7 @@
     </div>
 
     <!-- 독바: shared-navbar.js가 자동 주입 -->
-    <script src="shared-navbar.js"></script>
+    <script src="../scripts/shared-navbar.js"></script>
 
     <!-- PROCESS NAV BAR -->
     <div id="process-nav">
@@ -3275,7 +3275,7 @@
             { mesh: 'HPRO', id: 'HR-201', name: 'HPRO', kpi: '회수율 60%', pct: 0.60, color: '#3978B8', type: 'bar' },
         ];
 
-        loader.load('models/seperated.glb', function (gltf) {
+        loader.load('../models/seperated.glb', function (gltf) {
             const model = gltf.scene;
 
             model.traverse((child) => {

@@ -18,14 +18,25 @@ KSEAWATER02 과제(디지털 담수화 플랜트 농축수 자원화 기술개�
 
 Static HTML pages (no build system, no framework). Each page is a self-contained single-file HTML with inline CSS and JS. Pages share a common design language via CSS variables and a shared navigation bar.
 
+### Directory Structure
+
+```
+├── pages/          ← HTML 페이지
+├── assets/         ← 이미지 (CI 로고 등)
+├── models/         ← 3D 모델 (GLB)
+├── scripts/        ← JS, Python 도구
+├── docs/           ← 디자인 가이드 등
+├── memory/         ← 프로젝트 컨텍스트
+```
+
 ### Key Files
 
-- **`shared-navbar.js`** — Shared top dock/navbar injected into every page at runtime. Defines menu structure (`MENUS`), SVG icons, active-page detection, clock, and all dock CSS. Include via `<script src="shared-navbar.js"></script>`.
-- **`create_standalone.py`** — Python bundler that merges all HTML pages into a single `demo_standalone.html` for offline demo. Embeds images as Base64, inlines `shared-navbar.js`, embeds the GLB 3D model, and patches `window.location.href` navigation to `postMessage` routing between iframes.
-- **`demo_standalone.html`** — Generated output (~200MB). Do not edit manually; regenerate with `py create_standalone.py`.
-- **`models/concept.glb`** — 3D plant model loaded by `main.html` via Three.js.
+- **`scripts/shared-navbar.js`** — Shared top dock/navbar injected into every page at runtime. Defines menu structure (`MENUS`), SVG icons, active-page detection, clock, and all dock CSS. Include via `<script src="../scripts/shared-navbar.js"></script>`.
+- **`scripts/create_standalone.py`** — Python bundler that merges all HTML pages into a single `demo_standalone.html` for offline demo. Embeds images as Base64, inlines `shared-navbar.js`, embeds the GLB 3D model, and patches `window.location.href` navigation to `postMessage` routing between iframes.
+- **`demo_standalone.html`** — Generated output (~200MB). Do not edit manually; regenerate with `uv run scripts/create_standalone.py`.
+- **`models/concept.glb`** — 3D plant model loaded by `pages/main.html` via Three.js.
 
-### Pages
+### Pages (in `pages/`)
 
 | File | Purpose |
 |------|---------|
@@ -40,7 +51,7 @@ Static HTML pages (no build system, no framework). Each page is a self-contained
 
 ### Design System
 
-**See [`DESIGN_GUIDE.md`](DESIGN_GUIDE.md) for the full design specification.** Always reference this file when creating or modifying UI components.
+**See [`docs/DESIGN_GUIDE.md`](docs/DESIGN_GUIDE.md) for the full design specification.** Always reference this file when creating or modifying UI components.
 
 Key principles:
 - **Light theme only** — all pages use `#EBF3F5` background with white cards. Never use dark backgrounds for content areas.
@@ -60,14 +71,14 @@ Key principles:
 
 ### Regenerate standalone demo
 ```
-py create_standalone.py
+uv run scripts/create_standalone.py
 ```
-This bundles all HTML pages + assets into `demo_standalone.html`. Run from the wireframe directory.
+This bundles all HTML pages + assets into `demo_standalone.html`. Run from the project root.
 
 ## Conventions
 
 - All pages are designed for `width=1920` viewport (desktop kiosk/dashboard use).
 - Navigation between pages uses `window.location.href = 'page-xxx.html'`. The standalone bundler patches these to `postMessage` calls.
 - Korean language UI throughout. Comments in source are also Korean.
-- CI logos: `main_ci.png` (navbar logo), `login_ci.png` (login page logo).
-- When adding a new page: add its menu entry to the `MENUS` array in `shared-navbar.js` and include `<script src="shared-navbar.js"></script>` in the page. The bundler auto-discovers all `.html` files (except `demo_standalone.html`).
+- CI logos: `assets/main_ci.png` (navbar logo), `assets/login_ci.png` (login page logo).
+- When adding a new page: add it to `pages/`, add its menu entry to the `MENUS` array in `scripts/shared-navbar.js`, and include `<script src="../scripts/shared-navbar.js"></script>` in the page. The bundler auto-discovers all `.html` files in `pages/`.
