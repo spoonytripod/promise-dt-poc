@@ -2252,7 +2252,7 @@
         }
 
         .cb-pid-param-val.err {
-            color: #E67E22;
+            color: #F59E0B;
         }
 
         .cb-pid-param-val.out {
@@ -2636,6 +2636,129 @@
             font-size: 11px;
             color: #7A9EAB;
         }
+        /* ── 안내 배너 ── */
+        .main-notice {
+            position: fixed;
+            top: calc(var(--dock-h, 84px) + 16px);
+            left: 16px;
+            width: 420px;
+            background: rgba(255, 255, 255, 1);
+            border: 1px solid rgba(80, 184, 184, 0.24);
+            border-radius: 14px;
+            padding: 20px 24px;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+            z-index: 300;
+            animation: mainNoticeIn 0.4s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+        }
+
+        @keyframes mainNoticeIn {
+            from { opacity: 0; transform: translateX(-16px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        .main-notice.hidden {
+            display: none;
+        }
+
+        .main-notice-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .main-notice-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1A202D;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .main-notice-title-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 7px;
+            background: var(--grad-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .main-notice-close {
+            width: 28px;
+            height: 28px;
+            border-radius: 7px;
+            border: 1px solid rgba(80, 184, 184, 0.24);
+            background: rgba(80, 184, 184, 0.06);
+            color: #3D5A6A;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+
+        .main-notice-close:hover {
+            background: rgba(239, 68, 68, 0.08);
+            color: #EF4444;
+            border-color: rgba(239, 68, 68, 0.25);
+        }
+
+        .main-notice-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 14px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .main-notice-list li {
+            font-size: 15px;
+            color: #3D5A6A;
+            line-height: 1.6;
+            padding-left: 12px;
+            position: relative;
+        }
+
+        .main-notice-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 10px;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #50B8B8;
+        }
+
+        .main-notice-footer {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(80, 184, 184, 0.1);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .main-notice-footer input[type="checkbox"] {
+            accent-color: #50B8B8;
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+        }
+
+        .main-notice-footer label {
+            font-size: 14px;
+            color: #7A9EAB;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
     </style>
     <script type="importmap">
     {
@@ -2672,6 +2795,47 @@
             </svg>
         </div>
     </main>
+
+    <!-- MAIN NOTICE -->
+    <div class="main-notice" id="main-notice">
+        <div class="main-notice-header">
+            <div class="main-notice-title">
+                <span class="main-notice-title-icon">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+                    </svg>
+                </span>
+                조작 안내
+            </div>
+            <button class="main-notice-close" onclick="closeMainNotice()" title="닫기">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <ul class="main-notice-list">
+            <li><strong>좌클릭 드래그</strong>로 카메라 이동, <strong>휠클릭 드래그</strong>로 시점 회전, <strong>스크롤</strong>로 줌 조작이 가능합니다.</li>
+            <li>3D 모델의 설비를 클릭하면 <strong>래디얼 메뉴</strong>가 표시됩니다. 현재 <strong>상세 정보</strong> 패널과 <strong>제어 보드</strong> 기능이 목업으로 구현되어 있으며, 그 외 메뉴는 준비 중입니다.</li>
+            <li>상단의 <strong>메뉴 버튼</strong>을 통해 각 페이지로 이동할 수 있습니다. 다만 각 페이지의 콘텐츠는 목업입니다.</li>
+            <li>하단 중앙의 <strong>경고·위험 시나리오</strong> 버튼을 눌러 이상 상황을 모사해볼 수 있습니다.</li>
+        </ul>
+        <div class="main-notice-footer" onclick="document.getElementById('notice-dismiss').checked = !document.getElementById('notice-dismiss').checked">
+            <input type="checkbox" id="notice-dismiss">
+            <label for="notice-dismiss">다시 열지 않기</label>
+        </div>
+    </div>
+
+    <script>
+        function closeMainNotice() {
+            document.getElementById('main-notice').classList.add('hidden');
+            if (document.getElementById('notice-dismiss').checked) {
+                localStorage.setItem('main-notice-dismissed', 'true');
+            }
+        }
+        if (localStorage.getItem('main-notice-dismissed') === 'true') {
+            document.getElementById('main-notice').classList.add('hidden');
+        }
+    </script>
 
     <div class="wf-badge" id="wf-badge">
         <strong>⚠️ <span id="badge-title"></span></strong>

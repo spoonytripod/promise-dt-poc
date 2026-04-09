@@ -12,7 +12,7 @@
 (function () {
     'use strict';
 
-    const VERSION = '1.3.1';
+    const VERSION = '1.4.0';
 
     // <title> 태그 내 버전 업데이트
     if (document.title) {

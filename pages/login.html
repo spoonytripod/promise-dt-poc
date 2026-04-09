@@ -46,6 +46,7 @@
             align-items: center;
             justify-content: center;
         }
+
         body {
             width: 1920px;
             height: 1080px;
@@ -553,6 +554,113 @@
             transform: translateX(-50%) translateY(0);
         }
 
+        /* ── 안내 배너 ── */
+        .notice-banner {
+            position: fixed;
+            top: 74px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1200px;
+            background: rgba(255, 255, 255, 1);
+            border: 1px solid var(--border-strong);
+            border-radius: 16px;
+            padding: 36px 44px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.40);
+            z-index: 1000;
+            animation: noticeIn 0.4s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+        }
+
+        @keyframes noticeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .notice-banner.hidden {
+            display: none;
+        }
+
+        .notice-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .notice-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notice-title-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            flex-shrink: 0;
+            background: var(--grad-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notice-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border-strong);
+            background: rgba(80, 184, 184, 0.06);
+            color: var(--text-2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+
+        .notice-close:hover {
+            background: rgba(239, 68, 68, 0.08);
+            color: #EF4444;
+            border-color: rgba(239, 68, 68, 0.25);
+        }
+
+        .notice-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .notice-list li {
+            font-size: 18px;
+            color: var(--text-2);
+            line-height: 1.6;
+            padding-left: 14px;
+            position: relative;
+        }
+
+        .notice-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 12px;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--accent-mid);
+        }
+
         /* ── 버전 배지 ── */
         .version-badge {
             position: fixed;
@@ -580,6 +688,42 @@
         <div class="bg-grid"></div>
     </div>
 
+    <!-- NOTICE BANNER -->
+    <div class="notice-banner" id="notice-banner">
+        <div class="notice-header">
+            <div class="notice-title">
+                <span class="notice-title-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"
+                        stroke-linecap="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="16" x2="12" y2="12" />
+                        <line x1="12" y1="8" x2="12.01" y2="8" />
+                    </svg>
+                </span>
+                와이어프레임 안내
+            </div>
+            <button class="notice-close" onclick="document.getElementById('notice-banner').classList.add('hidden')"
+                title="닫기">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
+        </div>
+        <ul class="notice-list">
+            <li>본 와이어프레임은 <strong>데모 목적</strong>으로 제작되었으며, 기획 중인 기능과 화면 레이아웃을 직관적으로 전달하기 위한 인터랙티브 목업입니다. <br>실제 시스템은
+                <strong>Unity 기반</strong>으로 개발될 예정입니다.
+            </li>
+            <li>디자인 요소(색상, 아이콘, 스타일 등)는 확정된 시안이 아니며, 기능 전달을 위해 임의로 구성한 것입니다.</li>
+            <li>전반적인 <strong>기능 구성과 레이아웃 파악</strong>을 위한 참고 자료로 활용해 주시기 바랍니다.</li>
+            <li><strong>1920×1080 해상도 전체 화면(F11)</strong> 환경에 최적화되어 있으며, 그 외 환경에서는 화면이 정상적으로 표시되지 않을 수 있습니다.</li>
+            <li>하단의 <strong
+                    style="background:linear-gradient(90deg,#73CF79,#50B8B8,#3978B8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">시스템
+                    접속</strong> 버튼을 클릭하면 메인 화면으로 이동합니다. 메인 화면 우측 상단의 관리자 아이콘을 클릭하면 본 화면으로 복귀할 수 있습니다.</li>
+        </ul>
+    </div>
+
     <!-- TOAST -->
     <div id="toast">아이디 또는 비밀번호가 올바르지 않습니다.</div>
 
@@ -589,7 +733,8 @@
         <!-- LEFT: 브랜드 패널 -->
         <div class="left-panel">
             <div class="brand-mark" style="margin-top: 30px;">
-                <img src="../assets/login_ci.png" alt="PROMISE DT CI" style="max-height: 90px; width: auto; object-fit: contain;">
+                <img src="../assets/login_ci.png" alt="PROMISE DT CI"
+                    style="max-height: 90px; width: auto; object-fit: contain;">
             </div>
 
             <h1 class="hero-title" style="margin-top: -60px;">
@@ -762,13 +907,13 @@
         });
     </script>
     <script>
-        (function(){
-            function fit(){
-                var s=Math.min(innerWidth/1920,innerHeight/1080);
-                document.body.style.transform='scale('+s+')';
+        (function () {
+            function fit() {
+                var s = Math.min(innerWidth / 1920, innerHeight / 1080);
+                document.body.style.transform = 'scale(' + s + ')';
             }
             fit();
-            addEventListener('resize',fit);
+            addEventListener('resize', fit);
         })();
     </script>
 </body>
