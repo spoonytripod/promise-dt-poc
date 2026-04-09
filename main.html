@@ -1,0 +1,4922 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920">
+    <title>해수담수화 플랜트 DT v1.2</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            /* ── PROMISE 컬러웨이 (로고 직접 추출) ───────────────── */
+            --c-green: #73CF79;
+            /* 물방울 상단 그린               */
+            --c-mint: #50B8B8;
+            /* 중단 민트/시안 (핵심 강조)     */
+            --c-blue: #3978B8;
+            /* 하단 블루                      */
+            --c-navy: #1A202D;
+            /* PROMISE 텍스트 네이비           */
+            --c-teal: #5CC196;
+            /* 상단→중단 전이 민트그린         */
+
+            /* 그라디언트 */
+            --grad-main: linear-gradient(135deg, #73CF79 0%, #50B8B8 50%, #3978B8 100%);
+            --grad-h: linear-gradient(90deg, #73CF79 0%, #50B8B8 50%, #3978B8 100%);
+
+            /* UI 시스템 */
+            --bg: #EBF3F5;
+            --border: rgba(80, 184, 184, 0.14);
+            --border-strong: rgba(80, 184, 184, 0.24);
+            --text-1: #1A202D;
+            --text-2: #3D5A6A;
+            --text-3: #7A9EAB;
+            --accent: #3978B8;
+            --accent-mid: #50B8B8;
+            --accent-lt: rgba(80, 184, 184, 0.10);
+            --success: #73CF79;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --dock-h: 84px;
+            --navbar-h: 52px;
+            --panel-w: 576px;
+        }
+
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        body {
+            width: 1920px;
+            height: 1080px;
+            flex-shrink: 0;
+            overflow: hidden;
+            background: var(--bg);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--text-1);
+            -webkit-font-smoothing: antialiased;
+            transform-origin: center center;
+            position: relative;
+        }
+
+        /* ── 독바 스타일은 shared-navbar.js에서 주입됨 ── */
+
+        /* ── VIEWER (fullscreen immersive) ── */
+        #viewer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+        }
+
+        #iso-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: default;
+            pointer-events: none;
+            display: none;
+            /* No longer used — Three.js renders to its own canvas */
+        }
+
+        #labels-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .eq-label {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid var(--border-strong);
+            border-radius: 9px;
+            padding: 6px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.45;
+            text-align: center;
+            white-space: nowrap;
+            transform: translate(-50%, -100%) translateY(-10px);
+            pointer-events: all;
+            cursor: pointer;
+            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.2s, border-color 0.2s, background 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+        }
+
+        .eq-label:hover {
+            background: white;
+            box-shadow: 0 4px 14px rgba(80, 184, 184, 0.18);
+            border-color: rgba(80, 184, 184, 0.35);
+        }
+
+        .eq-label.selected {
+            background: white;
+            border-color: var(--accent-mid);
+            box-shadow: 0 0 0 3px rgba(80, 184, 184, 0.15), 0 4px 14px rgba(80, 184, 184, 0.25);
+        }
+
+        .eq-label.dimmed {
+            opacity: 0.18;
+            pointer-events: none;
+        }
+
+        .eq-label .eq-id {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--text-1);
+        }
+
+        .eq-label .eq-nm {
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--text-3);
+        }
+
+        .eq-label.selected .eq-id {
+            color: var(--accent-mid);
+        }
+
+        .alarm-dot {
+            display: inline-block;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--danger);
+            margin-left: 4px;
+            vertical-align: middle;
+            animation: blink 1.4s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1)
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(1.5)
+            }
+        }
+
+        #hint-row {
+            position: absolute;
+            bottom: 18px;
+            left: 0;
+            right: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        #hint-text {
+            font-size: 15.5px;
+            color: var(--text-2);
+            background: rgba(255, 255, 255, 0.80);
+            padding: 8px 22px;
+            border-radius: 100px;
+            pointer-events: none;
+            transition: opacity 0.4s;
+            white-space: nowrap;
+        }
+
+        /* ── ESC HINT ── */
+        #esc-hint {
+            position: absolute;
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 15.5px;
+            color: var(--text-3);
+            background: rgba(255, 255, 255, 0.72);
+            padding: 8px 22px;
+            border-radius: 100px;
+            pointer-events: all;
+            cursor: pointer;
+            transition: opacity 0.4s;
+            white-space: nowrap;
+            opacity: 0;
+            border: none;
+            font-family: inherit;
+        }
+
+        #esc-hint:hover {
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--text-2);
+        }
+
+        /* ── DETAIL PANEL ── */
+        #detail-panel {
+            position: fixed;
+            top: 50%;
+            right: 24px;
+            width: 440px;
+            /* Slightly wider for exactly matching the image proportions */
+            height: clamp(600px, 75vh, 900px);
+            /* 70% of screen approx */
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(28px);
+            border: 1px solid rgba(255, 255, 255, 1);
+            border-radius: 20px;
+            box-shadow: 0 16px 54px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+            z-index: 150;
+            transition: transform 0.4s cubic-bezier(0.34, 1.4, 0.64, 1), opacity 0.3s;
+            transform: translateY(-50%);
+        }
+
+        #detail-panel.hidden {
+            transform: translateY(-50%) translateX(120%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .ph {
+            padding: 20px 24px 16px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            position: relative;
+        }
+
+        .ph-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .ph-id-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ph-id {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            background: var(--grad-h);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .ph-name {
+            font-size: 16px;
+            color: var(--text-2);
+            font-weight: 500;
+        }
+
+        .status-badge {
+            font-size: 13.5px;
+            font-weight: 700;
+            padding: 4px 14px;
+            border-radius: 100px;
+        }
+
+        .s-ok {
+            background: rgba(115, 207, 121, .15);
+            color: #2E7D32;
+        }
+
+        .s-warn {
+            background: rgba(245, 158, 11, .12);
+            color: var(--warning);
+        }
+
+        .s-err {
+            background: rgba(239, 68, 68, .12);
+            color: var(--danger);
+        }
+
+        .ph-close {
+            background: rgba(0, 0, 0, 0.05);
+            border: none;
+            border-radius: 8px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            font-size: 17px;
+            color: var(--text-2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s, color 0.15s;
+            flex-shrink: 0;
+        }
+
+        .ph-close:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .pb {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 24px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .pb::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .pb::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 2px;
+        }
+
+        .sec-lbl {
+            font-size: 14px;
+            font-weight: 700;
+            color: #5C768A;
+            margin-bottom: 10px;
+        }
+
+        /* Sensor grid */
+        .sensor-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        .sensor-card {
+            background: #F4F6F8;
+            border-radius: 12px;
+            padding: 14px 6px 10px;
+            text-align: center;
+            border: 1px solid transparent;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .sensor-card:hover {
+            background: #EDF1F4;
+            border-color: rgba(80, 184, 184, 0.15);
+        }
+
+        .sv-lbl {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #8295A9;
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+
+        .sv-val {
+            font-family: 'JetBrains Mono', 'Plus Jakarta Sans', monospace;
+            font-size: 22px;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+            color: #111827;
+        }
+
+        .sv-unit {
+            font-size: 13px;
+            color: #9CA8B8;
+            font-weight: 500;
+            display: block;
+            margin-top: 4px;
+        }
+
+        /* Gauge */
+        .gauge-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            position: relative;
+        }
+
+        .gauge-val-row {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            margin-top: -20px;
+            /* Pull text up towards semi-circle center */
+        }
+
+        .gauge-val {
+            font-family: 'JetBrains Mono', 'Plus Jakarta Sans', monospace;
+            font-size: 34px;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+            color: #111827;
+        }
+
+        .gauge-sub {
+            font-size: 14px;
+            color: #748A9D;
+            margin-top: 4px;
+            font-weight: 500;
+            letter-spacing: -0.01em;
+        }
+
+        /* Chart */
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .chart-range {
+            display: flex;
+            gap: 4px;
+        }
+
+        .chart-range button {
+            font-size: 13px;
+            font-family: inherit;
+            border: none;
+            border-radius: 12px;
+            padding: 4px 10px;
+            cursor: pointer;
+            background: transparent;
+            color: #8D9FAF;
+            font-weight: 500;
+            transition: all 0.15s;
+        }
+
+        .chart-range button.active {
+            background: #EAF0F4;
+            color: #3C83B5;
+            font-weight: 600;
+        }
+
+        .chart-wrap {
+            border-radius: 12px;
+            overflow: hidden;
+            background: #F4F6F8;
+            padding: 12px 0 6px;
+        }
+
+        /* Actions */
+        .panel-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-top: 4px;
+            margin-top: auto;
+            /* Push to bottom */
+        }
+
+        .btn-p {
+            background: linear-gradient(90deg, #60C19A 0%, #3C85B6 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            font-family: inherit;
+            font-size: 15.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: filter 0.15s, transform 0.1s, box-shadow 0.15s;
+            box-shadow: 0 4px 14px rgba(62, 135, 194, 0.3);
+        }
+
+        .btn-p:hover {
+            filter: brightness(1.08);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(62, 135, 194, 0.4);
+        }
+
+        .btn-s {
+            background: #F4F6F8;
+            color: #4A5B6B;
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .btn-s:hover {
+            background: #EDF1F4;
+        }
+
+        /* ── 독바 레이아웃/아이템 스타일은 shared-navbar.js에서 주입됨 ── */
+
+        /* ── RADIAL MENU ── */
+        #radial-menu {
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 100;
+        }
+
+        #radial-menu.active {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            pointer-events: all;
+        }
+
+        .radial-g {
+            cursor: pointer;
+        }
+
+        .slice {
+            fill: rgba(255, 255, 255, 0.94);
+            stroke: var(--border-strong);
+            stroke-width: 1.5;
+            transition: fill 0.2s, stroke 0.2s;
+        }
+
+        .radial-g:hover .slice {
+            fill: white;
+            stroke: var(--accent-mid);
+        }
+
+        .slice-icon {
+            fill: none;
+            stroke: var(--text-2);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            pointer-events: none;
+            transition: stroke 0.2s;
+        }
+
+        .radial-g:hover .slice-icon {
+            stroke: var(--accent-mid);
+        }
+
+        .slice-text {
+            font-size: 11.5px;
+            font-weight: 700;
+            fill: var(--text-2);
+            text-anchor: middle;
+            dominant-baseline: central;
+            pointer-events: none;
+            transition: fill 0.2s;
+            font-family: inherit;
+        }
+
+        .radial-g:hover .slice-text {
+            fill: var(--accent-mid);
+        }
+
+        .menu-center {
+            fill: white;
+            stroke: var(--border-strong);
+            stroke-width: 2;
+            cursor: pointer;
+            transition: stroke 0.2s;
+        }
+
+        .menu-center:hover {
+            stroke: var(--accent-mid);
+        }
+
+        .menu-center-text {
+            font-size: 13.5px;
+            font-weight: 700;
+            fill: var(--text-1);
+            text-anchor: middle;
+            dominant-baseline: central;
+            pointer-events: none;
+        }
+
+        /* annotation badge */
+        .wf-badge {
+            position: fixed;
+            bottom: 94px;
+            right: 24px;
+            width: 260px;
+            background: rgba(255, 248, 220, 0.95);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            border-radius: 10px;
+            padding: 9px 15px;
+            font-size: 14px;
+            color: #92400E;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            z-index: 150;
+            /* Ensure it stays above topbar */
+            line-height: 1.5;
+            transition: opacity 0.3s;
+        }
+
+        .wf-badge strong {
+            font-weight: 700;
+            display: block;
+            margin-bottom: 2px;
+            font-size: 15px;
+        }
+
+        .wf-badge-error {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 260px;
+            background: rgba(254, 226, 226, 0.95);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            border-radius: 10px;
+            padding: 9px 15px;
+            font-size: 14px;
+            color: #991B1B;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            z-index: 150;
+            line-height: 1.5;
+            transition: opacity 0.3s;
+        }
+
+        .wf-badge-error strong {
+            font-weight: 700;
+            display: block;
+            margin-bottom: 2px;
+            font-size: 15px;
+        }
+
+        /* ── LAYER PANEL ── */
+        #layer-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 24px;
+            width: 460px;
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+            border: 1px solid rgba(255, 255, 255, 1);
+            border-radius: 18px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04);
+            z-index: 210;
+            overflow: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease, height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideUpFade 0.55s ease-out 0.4s both;
+            display: flex;
+            flex-direction: column-reverse;
+        }
+
+        .lp-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 11px 14px 10px;
+            border-top: 1px solid rgba(80, 184, 184, 0.12);
+            background: rgba(80, 184, 184, 0.04);
+        }
+
+        .lp-title-row {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .lp-title {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #5C768A;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .lp-toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-3);
+            transition: background 0.15s, color 0.15s, transform 0.25s;
+            flex-shrink: 0;
+        }
+
+        .lp-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.06);
+            color: var(--text-2);
+        }
+
+        .lp-toggle-btn.collapsed {
+            transform: rotate(180deg);
+        }
+
+        .lp-body {
+            padding: 10px 0 10px;
+            display: flex;
+            flex-direction: row;
+            gap: 0;
+            max-height: 420px;
+            overflow: hidden;
+            transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                padding 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .lp-body.collapsed {
+            max-height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+
+        .lp-section {
+            flex: 1;
+            padding: 0 12px;
+            min-width: 0;
+        }
+
+        .lp-section-label {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 6px;
+            padding: 0 2px;
+        }
+
+        .lp-section-label>span {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: var(--text-2);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        /* 전체선택 체크박스 행 */
+        .lp-all-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 4px 6px;
+            border-radius: 8px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.13s;
+        }
+
+        .lp-all-row:hover {
+            background: rgba(80, 184, 184, 0.07);
+        }
+
+        .lp-all-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-2);
+        }
+
+        /* 전체선택 아래 구분선 */
+        .lp-group-divider {
+            height: 1.5px;
+            background: rgba(80, 184, 184, 0.35);
+            border-radius: 2px;
+            margin: 2px 4px 6px;
+        }
+
+        .lp-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 4px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.13s;
+            user-select: none;
+        }
+
+        .lp-row:hover {
+            background: rgba(80, 184, 184, 0.07);
+        }
+
+        .lp-checkmark {
+            display: block;
+            width: 16px;
+            height: 16px;
+            border-radius: 4.5px;
+            border: 1.5px solid rgba(80, 184, 184, 0.4);
+            background: white;
+            transition: background 0.15s, border-color 0.15s;
+            position: relative;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        /* 세부 항목 체크박스 — 민트 */
+        input[type="checkbox"].lp-cb:checked+.lp-checkmark {
+            background: var(--accent-mid);
+            border-color: transparent;
+        }
+
+        /* 전체선택 체크박스 — 진한 네이비 계열 */
+        input[type="checkbox"].lp-cb-all:checked+.lp-checkmark {
+            background: #3D5A6A;
+            border-color: transparent;
+        }
+
+        input[type="checkbox"].lp-cb-all:indeterminate+.lp-checkmark {
+            background: #7A9EAB;
+            border-color: transparent;
+        }
+
+        input[type="checkbox"].lp-cb-all:indeterminate+.lp-checkmark::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 2px;
+            background: white;
+            border-radius: 1px;
+        }
+
+        input[type="checkbox"].lp-cb:checked+.lp-checkmark::after,
+        input[type="checkbox"].lp-cb-all:checked+.lp-checkmark::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            transform: translate(-50%, -50%);
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpolyline points='2,6 5,9 10,3' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;
+        }
+
+        input[type="checkbox"].lp-cb,
+        input[type="checkbox"].lp-cb-all {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+            pointer-events: none;
+        }
+
+        .lp-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            opacity: 0.85;
+        }
+
+        .lp-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-1);
+            flex: 1;
+            line-height: 1.2;
+        }
+
+        .lp-sub {
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--text-3);
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .lp-row.dimmed .lp-name,
+        .lp-row.dimmed .lp-sub,
+        .lp-row.dimmed .lp-dot {
+            opacity: 0.35;
+        }
+
+        .lp-divider {
+            width: 1px;
+            align-self: stretch;
+            background: rgba(80, 184, 184, 0.14);
+            flex-shrink: 0;
+            margin: 2px 0;
+        }
+
+        /* ── 3D TAG (Signpost) ── */
+        .eq-tag-3d {
+            background: rgba(255, 255, 255, 0.90);
+            /* Light background matching topbar */
+            border: 1px solid rgba(80, 184, 184, 0.18);
+            backdrop-filter: blur(8px);
+            color: var(--text-1);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 20px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+            /* Let clicks pass through to to the model if needed, or handle separately */
+            user-select: none;
+            white-space: nowrap;
+            transform: translate(-50%, -100%);
+            /* Center horizontally, point downwards */
+            margin-top: -15px;
+            /* Offset for the pointer */
+        }
+
+        .eq-tag-3d::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px 6px 0;
+            border-style: solid;
+            border-color: rgba(255, 255, 255, 0.90) transparent transparent transparent;
+            display: block;
+            width: 0;
+        }
+
+        .eq-tag-3d .tag-title {
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--accent);
+            margin-bottom: 2px;
+        }
+
+        .eq-tag-3d .tag-sub {
+            font-weight: 500;
+            font-size: 13px;
+            color: var(--text-2);
+        }
+
+        /* ═══════════════════════════════════════════
+           KPI OVERLAY STRIP
+        ═══════════════════════════════════════════ */
+        .kpi-strip {
+            position: fixed;
+            top: calc(var(--dock-h) + 14px);
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            z-index: 100;
+            pointer-events: none;
+            /* Let clicks pass through strip background */
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .hidden-ui {
+            opacity: 0 !important;
+            pointer-events: none !important;
+            visibility: hidden !important;
+        }
+
+        .kpi-card {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1px solid rgba(255, 255, 255, 1);
+            border-radius: 14px;
+            padding: 20px 22px;
+            width: 320px;
+            min-height: 160px;
+            box-shadow: 0 16px 54px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 10px;
+            pointer-events: auto;
+            /* Make cards clickable */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            animation: slideUpFade 0.6s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        /* Staggered animation delays for cards */
+        .kpi-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .kpi-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .kpi-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+
+        @keyframes slideUpFade {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+                /* Modified to keep transform: translateX(-50%) on container only */
+            }
+        }
+
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .kpi-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: #5C768A;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .kpi-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 7px;
+            background: var(--accent-lt);
+            flex-shrink: 0;
+        }
+
+        .kpi-icon svg {
+            display: block;
+        }
+
+        .kpi-status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #60C19A;
+            /* Green OK */
+            box-shadow: 0 0 10px rgba(96, 193, 154, 0.6);
+        }
+
+        .kpi-body {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+
+        .kpi-value {
+            font-family: 'JetBrains Mono', 'Plus Jakarta Sans', monospace;
+            font-size: 25px;
+            font-weight: 700;
+            color: #111827;
+            letter-spacing: -0.02em;
+        }
+
+        .kpi-unit {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            color: #9CA8B8;
+        }
+
+        .kpi-footer {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .kpi-trend {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .trend-down {
+            background: rgba(115, 207, 121, 0.15);
+            color: #2E7D32;
+            /* Green OK */
+        }
+
+        .trend-up {
+            background: rgba(239, 68, 68, 0.12);
+            color: var(--danger);
+            /* Red Error */
+        }
+
+        .kpi-target {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 11.5px;
+            color: #8295A9;
+            font-weight: 500;
+        }
+
+        /* ─── STATE STYLES ─────────────────────────── */
+        /* Normal (OK) */
+        .kpi-card.state-ok {
+            border-color: rgba(255, 255, 255, 1);
+        }
+
+        .kpi-card.state-ok .kpi-status-dot {
+            background-color: #60C19A;
+            box-shadow: 0 0 8px rgba(96, 193, 154, 0.6);
+        }
+
+        /* Warning (Warn) */
+        .kpi-card.state-warn {
+            border-color: rgba(245, 158, 11, 0.6);
+            /* Warning glow */
+            box-shadow: 0 8px 32px rgba(245, 158, 11, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04);
+        }
+
+        .kpi-card.state-warn .kpi-status-dot {
+            background-color: var(--warning);
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.8);
+            animation: blink 2s infinite;
+        }
+
+        .kpi-card.state-warn .kpi-value {
+            color: var(--warning);
+        }
+
+        /* Danger (Error) */
+        .kpi-card.state-danger {
+            border-color: rgba(239, 68, 68, 0.6);
+            box-shadow: 0 8px 32px rgba(239, 68, 68, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.04);
+        }
+
+        .kpi-card.state-danger .kpi-status-dot {
+            background-color: var(--danger);
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.8);
+            animation: blink 1s infinite;
+            /* Faster blink for danger */
+        }
+
+        .kpi-card.state-danger .kpi-value {
+            color: var(--danger);
+        }
+
+        /* Value Update Animation */
+        @keyframes valuePop {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.08);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .val-update {
+            animation: valuePop 0.3s ease-out;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        /* Small progress bar for Product Water Quality */
+        .kpi-progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(0, 0, 0, 0.06);
+            border-radius: 2px;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+
+        .kpi-progress-fill {
+            height: 100%;
+            background: #60C19A;
+            border-radius: 2px;
+            transition: width 0.5s ease;
+        }
+
+        .state-warn .kpi-progress-fill {
+            background: var(--warning);
+        }
+
+        .state-danger .kpi-progress-fill {
+            background: var(--danger);
+        }
+
+        /* SCENARIO BUTTONS FOR KPI TEST */
+        .kpi-scenarios {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            pointer-events: auto;
+            opacity: 0.1;
+            transition: opacity 0.3s;
+        }
+
+        .kpi-scenarios:hover {
+            opacity: 1;
+        }
+
+        .kpi-scenarios button {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #5C768A;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-family: inherit;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s;
+        }
+
+        .kpi-scenarios button:hover {
+            background: rgba(255, 255, 255, 0.9);
+            color: #111827;
+        }
+
+        /* ── PROCESS NAV BAR ── */
+        #process-nav {
+            position: fixed;
+            top: calc(var(--dock-h) + 24px);
+            left: 50%;
+            transform: translateX(-50%);
+            height: auto;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 190;
+            padding: 0;
+        }
+
+        .process-flow {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            padding: 0;
+            background: transparent;
+        }
+
+        /* ── 미니 카드 스테이지 ── */
+        .process-stage {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 190px;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(80, 184, 184, 0.12);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: visible;
+        }
+
+        .process-stage::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 16px;
+            right: 16px;
+            height: 3px;
+            border-radius: 0 0 3px 3px;
+            background: var(--grad-h);
+            opacity: 0.3;
+            transition: opacity 0.22s ease;
+        }
+
+        .process-stage:hover {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(80, 184, 184, 0.25);
+            box-shadow: 0 4px 16px rgba(80, 184, 184, 0.12);
+            transform: translateY(-1px);
+        }
+
+        .process-stage:hover::before {
+            opacity: 0.6;
+        }
+
+        .process-stage.active {
+            background: white;
+            border-color: var(--accent-mid);
+            box-shadow: 0 0 0 3px rgba(80, 184, 184, 0.10), 0 6px 24px rgba(80, 184, 184, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .process-stage.active::before {
+            opacity: 1;
+        }
+
+        .process-stage.active .stage-name {
+            color: var(--text-1);
+            font-weight: 700;
+        }
+
+        .process-stage.active .stage-icon {
+            background: var(--grad-main);
+            color: white;
+        }
+
+        /* ── 스테이지 아이콘 ── */
+        .stage-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(80, 184, 184, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.22s ease;
+            color: var(--accent-mid);
+        }
+
+        .stage-icon svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        .stage-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 0;
+        }
+
+        .stage-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-2);
+            letter-spacing: -0.01em;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+
+        .stage-sub {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-3);
+            line-height: 1.2;
+            font-family: 'JetBrains Mono', monospace;
+            white-space: nowrap;
+        }
+
+        /* ── 화살표 커넥터 ── */
+        .flow-connector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .flow-connector .flow-chevron {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent-mid);
+            animation: chevron-flow 3s ease-in-out infinite;
+            opacity: 0;
+        }
+
+        .flow-chevron.d2 {
+            animation-delay: 1.0s;
+        }
+
+        .flow-chevron.d3 {
+            animation-delay: 2.0s;
+        }
+
+        @keyframes chevron-flow {
+            0% {
+                left: 2px;
+                opacity: 0;
+            }
+
+            15% {
+                opacity: 0.5;
+            }
+
+            85% {
+                opacity: 0.5;
+            }
+
+            100% {
+                left: 22px;
+                opacity: 0;
+            }
+        }
+
+        /* ── 알람 배지 ── */
+        .process-alarm-badges {
+            position: absolute;
+            top: -8px;
+            right: -4px;
+            display: flex;
+            gap: 3px;
+            align-items: center;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(4px) scale(0.8);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        .process-alarm-badges.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .process-alarm-badge {
+            color: white;
+            font-weight: 700;
+            border-radius: 100px;
+            padding: 1px 6px 1px 4px;
+            line-height: 16px;
+            height: 18px;
+            font-family: 'JetBrains Mono', monospace;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+            white-space: nowrap;
+        }
+
+        .badge-icon {
+            font-size: 9px;
+            line-height: 1;
+        }
+
+        .badge-num {
+            font-size: 10px;
+            line-height: 1;
+        }
+
+        .process-alarm-badge.warn {
+            background: var(--warning);
+        }
+
+        .process-alarm-badge.danger {
+            background: var(--danger);
+            animation: badge-pulse-danger 2s ease-in-out infinite;
+        }
+
+        @keyframes badge-pulse-danger {
+
+            0%,
+            100% {
+                box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+            }
+
+            50% {
+                box-shadow: 0 2px 12px rgba(239, 68, 68, 0.5);
+            }
+        }
+
+        /* ══════════════════════════════════════════════
+           CONTROL BOARD OVERLAY (Light Theme)
+        ══════════════════════════════════════════════ */
+        #control-board {
+            position: fixed;
+            top: var(--dock-h, 84px);
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #EBF3F5;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s ease;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow: hidden;
+        }
+
+        #control-board.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* ── Control Board Header ── */
+        .cb-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 32px;
+            border-bottom: 1px solid rgba(80, 184, 184, 0.12);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(14px);
+            flex-shrink: 0;
+        }
+
+        .cb-header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .cb-eq-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(80, 184, 184, 0.12), rgba(57, 120, 184, 0.12));
+            border: 1px solid rgba(80, 184, 184, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .cb-eq-info h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1A202D;
+            margin: 0;
+        }
+
+        .cb-eq-info span {
+            font-size: 13px;
+            color: #7A9EAB;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .cb-header-center {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1;
+            justify-content: flex-end;
+            margin-right: 16px;
+        }
+
+        .cb-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: 1px solid rgba(80, 184, 184, 0.15);
+            background: white;
+            color: #7A9EAB;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .cb-close:hover {
+            background: rgba(239, 68, 68, 0.08);
+            color: #EF4444;
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        /* ── Control Board Body ── */
+        .cb-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            overflow: hidden;
+        }
+
+        .cb-section-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #7A9EAB;
+            margin-bottom: 4px;
+        }
+
+        /* ── HP Pump HMI Layout ── */
+        .cb-hmi-main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 280px 1fr 280px;
+            gap: 14px;
+            overflow: hidden;
+            padding: 14px 24px 16px;
+        }
+
+        .cb-state-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+
+        .cb-state-badge.running {
+            background: rgba(115, 207, 121, 0.12);
+            color: #2E7D32;
+            border: 1px solid rgba(115, 207, 121, 0.3);
+        }
+
+        .cb-state-badge.stopped {
+            background: rgba(122, 158, 171, 0.1);
+            color: #7A9EAB;
+            border: 1px solid rgba(122, 158, 171, 0.2);
+        }
+
+        .cb-state-badge.fault {
+            background: rgba(239, 68, 68, 0.1);
+            color: #EF4444;
+            border: 1px solid rgba(239, 68, 68, 0.25);
+        }
+
+        .cb-state-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .cb-state-badge.running .cb-state-dot {
+            background: #2E7D32;
+            animation: cb-pulse 1.5s infinite;
+        }
+
+        .cb-state-badge.stopped .cb-state-dot {
+            background: #7A9EAB;
+        }
+
+        .cb-state-badge.fault .cb-state-dot {
+            background: #EF4444;
+            animation: cb-pulse 0.8s infinite;
+        }
+
+        .cb-op-mode {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #3D5A6A;
+        }
+
+        .cb-mode-chip {
+            padding: 4px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .cb-mode-chip.auto {
+            background: rgba(57, 120, 184, 0.1);
+            color: #3978B8;
+        }
+
+        .cb-mode-chip.manual {
+            background: rgba(245, 158, 11, 0.1);
+            color: #D97706;
+        }
+
+        .cb-runtime {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: #7A9EAB;
+        }
+
+        .cb-start-stop {
+            display: flex;
+            gap: 8px;
+        }
+
+        .cb-btn-start,
+        .cb-btn-stop {
+            padding: 7px 22px;
+            border-radius: 8px;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .cb-btn-start {
+            background: linear-gradient(135deg, #73CF79, #50B8B8);
+            color: white;
+            box-shadow: 0 2px 8px rgba(115, 207, 121, 0.25);
+        }
+
+        .cb-btn-start:hover {
+            box-shadow: 0 4px 14px rgba(115, 207, 121, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .cb-btn-start:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .cb-btn-stop {
+            background: rgba(239, 68, 68, 0.08);
+            color: #EF4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .cb-btn-stop:hover {
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        .cb-btn-stop:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* ── Left: Process Parameters ── */
+        .cb-params-col {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+        }
+
+        .cb-params-col::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .cb-params-col::-webkit-scrollbar-thumb {
+            background: rgba(80, 184, 184, 0.2);
+            border-radius: 2px;
+        }
+
+        .cb-param-group {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid rgba(80, 184, 184, 0.1);
+            padding: 14px 16px;
+        }
+
+        .cb-param-group-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #7A9EAB;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .cb-param-group-title svg {
+            width: 14px;
+            height: 14px;
+            opacity: 0.6;
+        }
+
+        /* Collapsible panel */
+        .cb-param-group-title.collapsible {
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.2s;
+        }
+
+        .cb-param-group-title.collapsible:hover {
+            color: #3D5A6A;
+        }
+
+        .cb-param-group-title.collapsible .cb-chevron {
+            width: 14px;
+            height: 14px;
+            margin-left: auto;
+            opacity: 0.45;
+            transition: transform 0.25s ease;
+        }
+
+        .cb-param-group-title.collapsible.collapsed .cb-chevron {
+            transform: rotate(-90deg);
+        }
+
+        .cb-collapse-body {
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.25s ease;
+            max-height: 600px;
+            opacity: 1;
+        }
+
+        .cb-collapse-body.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+
+        .cb-param-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(80, 184, 184, 0.06);
+        }
+
+        .cb-param-row:last-child {
+            border-bottom: none;
+        }
+
+        .cb-param-name {
+            font-size: 12px;
+            color: #3D5A6A;
+        }
+
+        .cb-param-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1A202D;
+        }
+
+        .cb-param-value .unit {
+            font-size: 11px;
+            color: #7A9EAB;
+            margin-left: 2px;
+        }
+
+        .cb-param-value.warn {
+            color: #D97706;
+        }
+
+        .cb-param-value.danger {
+            color: #EF4444;
+        }
+
+        .cb-param-value.ok {
+            color: #2E7D32;
+        }
+
+        /* ── Center: Mimic + Controls ── */
+        .cb-center-col {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            overflow-y: auto;
+        }
+
+        .cb-center-col::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .cb-center-col::-webkit-scrollbar-thumb {
+            background: rgba(80, 184, 184, 0.2);
+            border-radius: 2px;
+        }
+
+        /* Mimic Diagram */
+        .cb-mimic-card {
+            background: white;
+            border-radius: 14px;
+            border: 1px solid rgba(80, 184, 184, 0.1);
+            padding: 20px;
+            flex-shrink: 0;
+        }
+
+        .cb-mimic-card .cb-section-title {
+            margin-bottom: 12px;
+        }
+
+        .cb-mimic-svg {
+            width: 100%;
+            height: 220px;
+            display: block;
+        }
+
+        /* Speed Setpoint Card */
+        .cb-setpoint-card {
+            background: white;
+            border-radius: 14px;
+            border: 1px solid rgba(80, 184, 184, 0.1);
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        /* PID Card (reused) */
+        .cb-pid-card {
+            background: white;
+            border: 1px solid rgba(80, 184, 184, 0.1);
+            border-radius: 14px;
+            padding: 18px;
+            transition: box-shadow 0.2s;
+        }
+
+        .cb-pid-card:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Trend Card */
+        .cb-trend-card {
+            background: white;
+            border-radius: 14px;
+            border: 1px solid rgba(80, 184, 184, 0.1);
+            padding: 18px;
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cb-trend-canvas {
+            width: 100%;
+            height: 100%;
+            min-height: 80px;
+            display: block;
+            border-radius: 8px;
+            background: #F4F7F9;
+            margin-top: 10px;
+        }
+
+        /* ── Right: Motor/Drive + Interlocks + Alarms ── */
+        .cb-right-col {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+        }
+
+        .cb-right-col::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .cb-right-col::-webkit-scrollbar-thumb {
+            background: rgba(80, 184, 184, 0.2);
+            border-radius: 2px;
+        }
+
+        /* Interlock grid */
+        .cb-interlock-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .cb-interlock-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 10px;
+            border-radius: 8px;
+            background: white;
+            border: 1px solid rgba(80, 184, 184, 0.08);
+            font-size: 11px;
+            color: #3D5A6A;
+        }
+
+        .cb-interlock-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .cb-interlock-dot.safe {
+            background: #73CF79;
+        }
+
+        .cb-interlock-dot.tripped {
+            background: #EF4444;
+            animation: cb-pulse 1.5s infinite;
+        }
+
+        /* Alarm list compact */
+        .cb-alarm-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .cb-alarm-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            color: #3D5A6A;
+        }
+
+        .cb-alarm-item.warn {
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.15);
+        }
+
+        .cb-alarm-item.danger {
+            background: rgba(239, 68, 68, 0.06);
+            border: 1px solid rgba(239, 68, 68, 0.12);
+        }
+
+        .cb-alarm-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: #7A9EAB;
+            flex-shrink: 0;
+        }
+
+        /* Slider */
+        .cb-slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .cb-slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .cb-slider-name {
+            font-size: 12px;
+            color: #7A9EAB;
+        }
+
+        .cb-slider-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1A202D;
+        }
+
+        .cb-slider-val .unit {
+            font-size: 11px;
+            color: #7A9EAB;
+            margin-left: 2px;
+        }
+
+        .cb-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(80, 184, 184, 0.12);
+            outline: none;
+        }
+
+        .cb-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #50B8B8;
+            border: 2px solid white;
+            cursor: pointer;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+        }
+
+        .cb-slider-range {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #A8C4CE;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Toggle */
+        .cb-toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .cb-toggle-label {
+            font-size: 12px;
+            color: #3D5A6A;
+        }
+
+        .cb-toggle {
+            width: 44px;
+            height: 24px;
+            border-radius: 12px;
+            background: #D0DADE;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            transition: background 0.25s;
+        }
+
+        .cb-toggle.on {
+            background: rgba(115, 207, 121, 0.5);
+        }
+
+        .cb-toggle::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+            transition: transform 0.25s, background 0.25s;
+        }
+
+        .cb-toggle.on::after {
+            transform: translateX(20px);
+            background: #2E7D32;
+        }
+
+        /* Gauge */
+        .cb-gauge-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .cb-mini-gauge {
+            width: 56px;
+            height: 56px;
+            position: relative;
+        }
+
+        .cb-mini-gauge svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .cb-mini-gauge .track {
+            fill: none;
+            stroke: rgba(80, 184, 184, 0.1);
+            stroke-width: 5;
+        }
+
+        .cb-mini-gauge .fill {
+            fill: none;
+            stroke-width: 5;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.6s ease;
+        }
+
+        .cb-gauge-info {
+            flex: 1;
+        }
+
+        .cb-gauge-main {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 20px;
+            font-weight: 500;
+            color: #1A202D;
+        }
+
+        .cb-gauge-sub {
+            font-size: 11px;
+            color: #7A9EAB;
+        }
+
+        /* PID params */
+        .cb-pid-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .cb-pid-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1A202D;
+        }
+
+        .cb-pid-params {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .cb-pid-param {
+            text-align: center;
+            padding: 10px 6px;
+            background: #F4F7F9;
+            border-radius: 10px;
+            border: 1px solid rgba(80, 184, 184, 0.08);
+        }
+
+        .cb-pid-param-label {
+            font-size: 10px;
+            color: #7A9EAB;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .cb-pid-param-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 16px;
+            font-weight: 500;
+            color: #1A202D;
+        }
+
+        .cb-pid-param-val.sp {
+            color: #3978B8;
+        }
+
+        .cb-pid-param-val.pv {
+            color: #2E7D32;
+        }
+
+        .cb-pid-param-val.err {
+            color: #E67E22;
+        }
+
+        .cb-pid-param-val.out {
+            color: #50B8B8;
+        }
+
+        /* Valve visual */
+        .cb-valve-visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 0;
+        }
+
+        .cb-valve-pipe {
+            height: 8px;
+            flex: 1;
+            border-radius: 4px;
+            background: rgba(80, 184, 184, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cb-valve-pipe .flow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, #50B8B8, #73CF79);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .cb-valve-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: rgba(80, 184, 184, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .cb-valve-icon svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Ctrl card generic */
+        .cb-ctrl-card {
+            background: white;
+            border: 1px solid rgba(80, 184, 184, 0.1);
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .cb-ctrl-card:hover {
+            border-color: rgba(80, 184, 184, 0.22);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        }
+
+        .cb-ctrl-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .cb-ctrl-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1A202D;
+        }
+
+        .cb-ctrl-id {
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            color: #7A9EAB;
+        }
+
+        /* Controls grid in center */
+        .cb-controls-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .cb-ctrl-card {
+            background: white;
+            border: 1px solid rgba(80, 184, 184, 0.1);
+            border-radius: 14px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            transition: box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .cb-ctrl-card:hover {
+            border-color: rgba(80, 184, 184, 0.22);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        }
+
+        .cb-ctrl-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .cb-ctrl-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1A202D;
+        }
+
+        .cb-ctrl-id {
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            color: #7A9EAB;
+        }
+
+        /* Toggle Switch */
+        .cb-toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .cb-toggle-label {
+            font-size: 12px;
+            color: #3D5A6A;
+        }
+
+        .cb-toggle {
+            width: 44px;
+            height: 24px;
+            border-radius: 12px;
+            background: #D0DADE;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            transition: background 0.25s;
+        }
+
+        .cb-toggle.on {
+            background: rgba(115, 207, 121, 0.5);
+        }
+
+        .cb-toggle::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+            transition: transform 0.25s, background 0.25s;
+        }
+
+        .cb-toggle.on::after {
+            transform: translateX(20px);
+            background: #2E7D32;
+        }
+
+        /* Slider Control */
+        .cb-slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .cb-slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .cb-slider-name {
+            font-size: 12px;
+            color: #7A9EAB;
+        }
+
+        .cb-slider-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1A202D;
+        }
+
+        .cb-slider-val .unit {
+            font-size: 11px;
+            color: #7A9EAB;
+            margin-left: 2px;
+        }
+
+        .cb-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(80, 184, 184, 0.12);
+            outline: none;
+        }
+
+        .cb-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #50B8B8;
+            border: 2px solid white;
+            cursor: pointer;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+        }
+
+        .cb-slider-range {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #A8C4CE;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Gauge (inline small) */
+        .cb-gauge-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .cb-mini-gauge {
+            width: 56px;
+            height: 56px;
+            position: relative;
+        }
+
+        .cb-mini-gauge svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .cb-mini-gauge .track {
+            fill: none;
+            stroke: rgba(80, 184, 184, 0.1);
+            stroke-width: 5;
+        }
+
+        .cb-mini-gauge .fill {
+            fill: none;
+            stroke-width: 5;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.6s ease;
+        }
+
+        .cb-gauge-info {
+            flex: 1;
+        }
+
+        .cb-gauge-main {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 20px;
+            font-weight: 500;
+            color: #1A202D;
+        }
+
+        .cb-gauge-sub {
+            font-size: 11px;
+            color: #7A9EAB;
+        }
+
+        /* Valve visual */
+        .cb-valve-visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 0;
+        }
+
+        .cb-valve-pipe {
+            height: 8px;
+            flex: 1;
+            border-radius: 4px;
+            background: rgba(80, 184, 184, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cb-valve-pipe .flow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, #50B8B8, #73CF79);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .cb-valve-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: rgba(80, 184, 184, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .cb-valve-icon svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        @keyframes cb-pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        /* ── Footer Status Bar ── */
+        .cb-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 32px;
+            border-top: 1px solid rgba(80, 184, 184, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(14px);
+            flex-shrink: 0;
+        }
+
+        .cb-footer-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .cb-footer-stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #7A9EAB;
+        }
+
+        .cb-footer-stat .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .cb-footer-stat .dot.green {
+            background: #73CF79;
+        }
+
+        .cb-footer-stat .dot.yellow {
+            background: #F59E0B;
+        }
+
+        .cb-footer-stat .dot.red {
+            background: #EF4444;
+        }
+
+        .cb-footer-ts {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #7A9EAB;
+        }
+    </style>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+
+<body>
+
+    <!-- VIEWER -->
+    <main id="viewer">
+        <!-- old iso-canvas removed: Three.js creates its own canvas -->
+        <div id="labels-container"></div>
+        <div id="hint-row">
+            <div class="kpi-scenarios">
+                <button onclick="setKPIScenario('normal')">Normal (정상)</button>
+                <button onclick="setKPIScenario('warning')">Warning (경고)</button>
+                <button onclick="setKPIScenario('danger')">Danger (위험)</button>
+            </div>
+            <div id="hint-text">설비를 클릭하면 상세 정보를 확인할 수 있습니다</div>
+        </div>
+        <button id="esc-hint" onclick="deselect()">← 전체 공정으로 돌아가기</button>
+
+        <!-- RADIAL MENU -->
+        <div id="radial-menu">
+            <svg id="radial-svg" viewBox="0 0 260 260" width="260" height="260">
+                <g id="radial-slices"></g>
+                <circle class="menu-center" cx="130" cy="130" r="35" onclick="deselect()" />
+                <text class="menu-center-text" x="130" y="130">닫기</text>
+            </svg>
+        </div>
+    </main>
+
+    <div class="wf-badge" id="wf-badge">
+        <strong>⚠️ <span id="badge-title"></span></strong>
+        설비 클릭 → 줌인 + 패널
+    </div>
+    <div class="wf-badge-error" id="wf-badge-error">
+        <strong>🚨 설비 이상</strong>
+        RO-B 운영 압력 이상 감지
+    </div>
+    <script>
+        document.getElementById('badge-title').textContent = document.title;
+    </script>
+
+    <!-- KPI OVERLAY STRIP -->
+    <div class="kpi-strip">
+        <!-- KPI 1: 에너지 소비량 (Energy Consumption) -->
+        <div class="kpi-card state-ok" id="kpi-energy">
+            <div class="kpi-header">
+                <span class="kpi-title">
+                    <span class="kpi-icon">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#50B8B8" stroke-width="2.2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                        </svg>
+                    </span>
+                    Energy Consumption
+                </span>
+                <div class="kpi-status-dot"></div>
+            </div>
+            <div class="kpi-body">
+                <span class="kpi-value" id="val-energy">2.15</span>
+                <span class="kpi-unit">kWh/m³</span>
+            </div>
+            <div style="height: 60px; width: 100%; margin-top: 8px; margin-bottom: 2px;">
+                <canvas id="chart-energy" style="width: 100%; height: 100%;"></canvas>
+            </div>
+            <div class="kpi-footer">
+                <span class="kpi-trend trend-down" id="trend-energy">▼ 0.05</span>
+                <span class="kpi-target">Target: &le; 2.2</span>
+            </div>
+        </div>
+
+        <!-- KPI 2: 생산 유량 (Production Flow Rate) -->
+        <div class="kpi-card state-ok" id="kpi-flow">
+            <div class="kpi-header">
+                <span class="kpi-title">
+                    <span class="kpi-icon">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#50B8B8" stroke-width="2.2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2C6 8 4 12 4 15a8 8 0 0 0 16 0c0-3-2-7-8-13z" />
+                            <path d="M9.5 15.5a3 3 0 0 0 5 0" />
+                        </svg>
+                    </span>
+                    Production Flow Rate
+                </span>
+                <div class="kpi-status-dot"></div>
+            </div>
+            <div class="kpi-body">
+                <span class="kpi-value" id="val-flow">12,500</span>
+                <span class="kpi-unit">m³/day</span>
+            </div>
+            <div style="height: 60px; width: 100%; margin-top: 8px; margin-bottom: 2px;">
+                <canvas id="chart-flow" style="width: 100%; height: 100%;"></canvas>
+            </div>
+            <div class="kpi-footer">
+                <span class="kpi-trend trend-up" id="trend-flow"
+                    style="background: rgba(115, 207, 121, 0.15); color: #2E7D32;">▲ 500</span>
+                <span class="kpi-target">Target: 12,000</span>
+            </div>
+        </div>
+
+        <!-- KPI 3: 생산수 수질 (Product Water Quality) -->
+        <div class="kpi-card state-ok" id="kpi-quality">
+            <div class="kpi-header">
+                <span class="kpi-title">
+                    <span class="kpi-icon">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#50B8B8" stroke-width="2.2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 3h6m-5 0v6l-4 8a1 1 0 0 0 .9 1.5h10.2a1 1 0 0 0 .9-1.5l-4-8V3" />
+                            <path d="M7.5 15.5h9" />
+                        </svg>
+                    </span>
+                    Product Water Quality
+                </span>
+                <div class="kpi-status-dot"></div>
+            </div>
+            <div class="kpi-body">
+                <span class="kpi-value" id="val-quality">185</span>
+                <span class="kpi-unit">TDS (mg/L)</span>
+            </div>
+            <div style="height: 60px; width: 100%; margin-top: 8px; margin-bottom: 2px;">
+                <canvas id="chart-quality" style="width: 100%; height: 100%;"></canvas>
+            </div>
+            <div class="kpi-footer" style="flex-direction: column; align-items: flex-start; gap: 2px;">
+                <div style="display: flex; justify-content: space-between; width: 100%;">
+                    <span class="kpi-target">Target: &le; 200</span>
+                    <span class="kpi-target" id="margin-quality">Margin: 15</span>
+                </div>
+                <div class="kpi-progress-bar">
+                    <div class="kpi-progress-fill" id="progress-quality" style="width: 92.5%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DETAIL PANEL -->
+    <aside id="detail-panel" class="hidden">
+        <div class="ph">
+            <div class="ph-top">
+                <div class="ph-id-row">
+                    <span class="ph-id" id="ph-id">RO-B</span>
+                    <span class="status-badge s-err" id="ph-status">경보</span>
+                </div>
+                <button class="ph-close" id="ph-close">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round">
+                        <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="ph-name" id="ph-name">RO 모듈 B</div>
+        </div>
+
+        <div class="pb">
+            <div>
+                <div class="sec-lbl">실시간 센서값</div>
+                <div class="sensor-grid">
+                    <div class="sensor-card">
+                        <div class="sv-lbl" id="sv-lbl-a">유입 유량</div>
+                        <div class="sv-val" id="sv-val-a">20.21</div>
+                        <span class="sv-unit" id="sv-unit-a">l/min</span>
+                    </div>
+                    <div class="sensor-card">
+                        <div class="sv-lbl" id="sv-lbl-b">운영 압력</div>
+                        <div class="sv-val" id="sv-val-b">56.1</div>
+                        <span class="sv-unit" id="sv-unit-b">bar</span>
+                    </div>
+                    <div class="sensor-card">
+                        <div class="sv-lbl" id="sv-lbl-c">회수율</div>
+                        <div class="sv-val" id="sv-val-c">71.8</div>
+                        <span class="sv-unit" id="sv-unit-c">%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="sec-lbl">에너지 원단위 (SEC)</div>
+                <div class="gauge-wrap">
+                    <canvas id="gauge-canvas" width="240" height="140"></canvas>
+                    <div class="gauge-val-row">
+                        <span class="gauge-val" id="gauge-val">2.41</span>
+                        <span style="font-size:13px;color:#9CA8B8;font-weight:500;">kWh/m³</span>
+                    </div>
+                    <div class="gauge-sub">목표치 2.2 kWh/m³ 이하</div>
+                </div>
+            </div>
+
+            <div>
+                <div class="chart-header">
+                    <div class="sec-lbl" style="margin-bottom:0">운전 압력 추이</div>
+                    <div class="chart-range">
+                        <button class="active">1h</button>
+                        <button>6h</button>
+                        <button>24h</button>
+                    </div>
+                </div>
+                <div class="chart-wrap">
+                    <canvas id="spark-canvas" height="58"></canvas>
+                </div>
+            </div>
+
+            <div class="panel-actions">
+                <button class="btn-p">▶&nbsp; 운영 시뮬레이션 시작</button>
+                <button class="btn-s">설비 상세 보기 →</button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ═══════════════════════════════════════════
+         CONTROL BOARD OVERLAY
+    ═══════════════════════════════════════════ -->
+    <div id="control-board">
+        <!-- Header (includes status controls) -->
+        <div class="cb-header">
+            <div class="cb-header-left">
+                <div class="cb-eq-icon">⚙️</div>
+                <div class="cb-eq-info">
+                    <h2 id="cb-eq-name">고압 펌프 P-101</h2>
+                    <span id="cb-eq-id">MDL-HP-PUMP-5500</span>
+                </div>
+            </div>
+            <div class="cb-header-center" id="cb-status-banner">
+                <!-- Populated by JS: state badge, mode, runtime, start/stop -->
+            </div>
+            <button class="cb-close" onclick="hideControlBoard()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Body: HP Pump HMI -->
+        <div class="cb-body">
+            <!-- HMI Main Area -->
+            <div class="cb-hmi-main" id="cb-hmi-main">
+                <!-- Populated by JS: Left params | Center mimic+controls | Right motor+interlocks -->
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="cb-footer">
+            <div class="cb-footer-left">
+                <div class="cb-footer-stat">
+                    <div class="dot green"></div> PLC 통신 정상
+                </div>
+                <div class="cb-footer-stat">
+                    <div class="dot green"></div> SCADA 연결
+                </div>
+                <div class="cb-footer-stat">
+                    <div class="dot yellow"></div> 경보 3건
+                </div>
+            </div>
+            <div class="cb-footer-ts" id="cb-timestamp">2026-04-03 14:32:18 KST</div>
+        </div>
+    </div>
+
+    <!-- LAYER VISIBILITY PANEL -->
+    <div id="layer-panel">
+        <div class="lp-header">
+            <div class="lp-title-row">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                    stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:0.65;">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                    <polyline points="2 17 12 22 22 17" />
+                    <polyline points="2 12 12 17 22 12" />
+                </svg>
+                <span class="lp-title">레이어 시각화</span>
+            </div>
+            <button class="lp-toggle-btn" onclick="toggleLayerPanel(this)" title="패널 접기">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round">
+                    <polyline points="6 9 12 15 18 9" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="lp-body" id="lp-body">
+            <!-- 공정 단계별 그룹 -->
+            <div class="lp-section">
+                <div class="lp-section-label">
+                    <span>공정 설비</span>
+                </div>
+                <div class="lp-all-row" onclick="toggleGroup('process')">
+                    <input type="checkbox" class="lp-cb-all" id="all-process" checked>
+                    <span class="lp-checkmark"></span>
+                    <span class="lp-all-label">전체 선택</span>
+                </div>
+                <div class="lp-group-divider"></div>
+                <div class="lp-row" data-group="process" onclick="onLayerChange(this, 'process')">
+                    <input type="checkbox" class="lp-cb" checked>
+                    <span class="lp-checkmark"></span>
+                    <span class="lp-dot" style="background:#3978B8;"></span>
+                    <span class="lp-name">취수 설비</span>
+                    <span class="lp-sub">Intake</span>
+                </div>
+                <div class="lp-row" data-group="process" onclick="onLayerChange(this, 'process')">
+                    <input type="checkbox" class="lp-cb" checked>
+                    <span class="lp-checkmark"></span>
+                    <span class="lp-dot" style="background:#50B8B8;"></span>
+                    <span class="lp-name">전처리 설비</span>
+                    <span class="lp-sub">Pre-treatment</span>
+                </div>
+                <div class="lp-row" data-group="process" onclick="onLayerChange(this, 'process')">
+                    <input type="checkbox" class="lp-cb" checked>
+                    <span class="lp-checkmark"></span>
+                    <span class="lp-dot" style="background:#5CC196;"></span>
+                    <span class="lp-name">역삼투 설비</span>
+                    <span class="lp-sub">RO Membrane</span>
+                </div>
+                <div class="lp-row" data-group="process" onclick="onLayerChange(this, 'process')">
+                    <input type="checkbox" class="lp-cb" checked>
+                    <span class="lp-checkmark"></span>
+                    <span class="lp-dot" style="background:#73CF79;"></span>
+                    <span class="lp-name">후처리</span>
+                    <span class="lp-sub">Post-treatment</span>
+                </div>
+            </div>
+
+            <div class="lp-divider"></div>
+
+            <!-- 기능 오버레이 그룹 -->
+            <div class="lp-section">
+                <div class="lp-section-label">
+                    <span>기능 오버레이</span>
+                </div>
+                <div class="lp-all-row" onclick="toggleGroup('overlay')">
+                    <input type="checkbox" class="lp-cb-all" id="all-overlay">
+                    <span class="lp-checkmark"></span>
+                    <span class="lp-all-label">전체 선택</span>
+                </div>
+                <div class="lp-group-divider"></div>
+                <div class="lp-row" data-group="overlay" data-layer="eq-info-card"
+                    onclick="onLayerChange(this, 'overlay')">
+                    <input type="checkbox" class="lp-cb" checked>
+                    <span class="lp-checkmark"></span>
+                    <span class="lp-dot" style="background:#50B8B8;"></span>
+                    <span class="lp-name">설비별 정보 카드</span>
+                    <span class="lp-sub">Equipment Info</span>
+                </div>
+                <div class="lp-row" data-group="overlay" onclick="onLayerChange(this, 'overlay')">
+                    <input type="checkbox" class="lp-cb" checked>
+                    <span class="lp-checkmark"></span>
+                    <span class="lp-dot" style="background:#F59E0B;"></span>
+                    <span class="lp-name">센서 위치</span>
+                    <span class="lp-sub">Sensors</span>
+                </div>
+                <div class="lp-row" data-group="overlay" onclick="onLayerChange(this, 'overlay')">
+                    <input type="checkbox" class="lp-cb">
+                    <span class="lp-checkmark"></span>
+                    <span class="lp-dot" style="background:#EF4444;"></span>
+                    <span class="lp-name">경보·알람</span>
+                    <span class="lp-sub">Alarms</span>
+                </div>
+                <div class="lp-row" data-group="overlay" onclick="onLayerChange(this, 'overlay')">
+                    <input type="checkbox" class="lp-cb">
+                    <span class="lp-checkmark"></span>
+                    <span class="lp-dot" style="background:#3978B8;"></span>
+                    <span class="lp-name">유량 흐름</span>
+                    <span class="lp-sub">Flow Path</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 독바: shared-navbar.js가 자동 주입 -->
+    <script src="shared-navbar.js"></script>
+
+    <!-- PROCESS NAV BAR -->
+    <div id="process-nav">
+        <div class="process-flow">
+
+            <!-- 1. 취수 -->
+            <div class="process-stage" data-stage="intake">
+                <div class="stage-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
+                    </svg>
+                </div>
+                <div class="stage-info">
+                    <span class="stage-name">취수</span>
+                    <span class="stage-sub">1,023 m³/d</span>
+                </div>
+                <div class="process-alarm-badges">
+                    <div class="process-alarm-badge warn" data-count="0" style="display:none;"><span
+                            class="badge-icon">⚠</span><span class="badge-num">0</span></div>
+                    <div class="process-alarm-badge danger" data-count="0" style="display:none;"><span
+                            class="badge-icon">✕</span><span class="badge-num">0</span></div>
+                </div>
+            </div>
+
+            <!-- 커넥터 -->
+            <div class="flow-connector">
+                <svg class="flow-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6" />
+                </svg>
+                <svg class="flow-chevron d2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6" />
+                </svg>
+                <svg class="flow-chevron d3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6" />
+                </svg>
+            </div>
+
+            <!-- 2. 전처리 -->
+            <div class="process-stage active" data-stage="pretreat">
+                <div class="stage-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M21 3H3v18h18V3zm-2 16H5V5h14v14zm-4-4h-2v-2h2v-2h-2V9h2V7H9v2h2v2H9v2h2v2H9v2h6v-2z" />
+                    </svg>
+                </div>
+                <div class="stage-info">
+                    <span class="stage-name">전처리</span>
+                    <span class="stage-sub">932 m³/d</span>
+                </div>
+                <div class="process-alarm-badges">
+                    <div class="process-alarm-badge warn" data-count="0" style="display:none;"><span
+                            class="badge-icon">⚠</span><span class="badge-num">0</span></div>
+                    <div class="process-alarm-badge danger" data-count="0" style="display:none;"><span
+                            class="badge-icon">✕</span><span class="badge-num">0</span></div>
+                </div>
+            </div>
+
+            <!-- 커넥터 -->
+            <div class="flow-connector">
+                <svg class="flow-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6" />
+                </svg>
+                <svg class="flow-chevron d2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6" />
+                </svg>
+                <svg class="flow-chevron d3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6" />
+                </svg>
+            </div>
+
+            <!-- 3. RO 본공정 -->
+            <div class="process-stage" data-stage="ro">
+                <div class="stage-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z" />
+                    </svg>
+                </div>
+                <div class="stage-info">
+                    <span class="stage-name">RO 본공정</span>
+                    <span class="stage-sub">회수율 72%</span>
+                </div>
+                <div class="process-alarm-badges">
+                    <div class="process-alarm-badge warn" data-count="0" style="display:none;"><span
+                            class="badge-icon">⚠</span><span class="badge-num">0</span></div>
+                    <div class="process-alarm-badge danger" data-count="0" style="display:none;"><span
+                            class="badge-icon">✕</span><span class="badge-num">0</span></div>
+                </div>
+            </div>
+
+            <!-- 커넥터 -->
+            <div class="flow-connector">
+                <svg class="flow-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6" />
+                </svg>
+                <svg class="flow-chevron d2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6" />
+                </svg>
+                <svg class="flow-chevron d3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6" />
+                </svg>
+            </div>
+
+            <!-- 4. 생산수 -->
+            <div class="process-stage" data-stage="product">
+                <div class="stage-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M12 2c-5.33 4.55-8 8.48-8 11.8 0 4.98 3.8 8.2 8 8.2s8-3.22 8-8.2c0-3.32-2.67-7.25-8-11.8zm0 18c-3.35 0-6-2.57-6-6.2 0-2.34 1.95-5.44 6-9.14 4.05 3.7 6 6.79 6 9.14 0 3.63-2.65 6.2-6 6.2zm-3.49-6.37c.17-.66.83-1.06 1.49-.89.67.17 1.07.83.9 1.49-.39 1.52.48 2.11 1.22 2.29.75.18 1.77-.12 2.17-1.64.17-.66.83-1.07 1.49-.9.67.17 1.07.83.9 1.49-.78 3.01-3.3 3.91-5.17 3.46-1.87-.46-3.78-2.28-3-5.3z" />
+                    </svg>
+                </div>
+                <div class="stage-info">
+                    <span class="stage-name">생산수</span>
+                    <span class="stage-sub">312 mg/L</span>
+                </div>
+                <div class="process-alarm-badges">
+                    <div class="process-alarm-badge warn" data-count="0" style="display:none;"><span
+                            class="badge-icon">⚠</span><span class="badge-num">0</span></div>
+                    <div class="process-alarm-badge danger" data-count="0" style="display:none;"><span
+                            class="badge-icon">✕</span><span class="badge-num">0</span></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script type="module">
+        /* ═══════════════════════════════════════════
+           THREE.JS IMPORTS
+        ═══════════════════════════════════════════ */
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+        /* ═══════════════════════════════════════════
+           SCENE, CAMERA, RENDERER
+        ═══════════════════════════════════════════ */
+        const viewer = document.getElementById('viewer');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color('#e2eef2');
+        scene.fog = new THREE.FogExp2('#e2eef2', 0.0005); // reduced fog density
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 5000);
+        camera.position.set(300, 400, 500); // fly-in 출발점 (deselect()로 도착점까지 애니메이션)
+        camera.lookAt(0, 0, 0);
+        camera.rotation.order = 'YXZ'; // Important for FPS look so roll isn't introduced
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        renderer.outputColorSpace = THREE.SRGBColorSpace; // ensure proper color mapping
+        renderer.domElement.style.touchAction = 'none'; // CRITICAL: prevent browser hijacking drag events
+        viewer.appendChild(renderer.domElement);
+
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.setSize(window.innerWidth, window.innerHeight);
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none'; // so we can still click through to the webgl canvas if needed
+        viewer.appendChild(labelRenderer.domElement);
+
+        /* ── First-Person Camera State ── */
+        const camState = {
+            isLooking: false,
+            isPanning: false,
+            lookSpeed: 0.003,
+            panSpeed: 0.5,
+            zoomSpeed: 2.0,
+            pitch: 0,
+            yaw: 0
+        };
+
+        const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+        euler.setFromQuaternion(camera.quaternion);
+        camState.pitch = euler.x;
+        camState.yaw = euler.y;
+
+        /* ═══════════════════════════════════════════
+           LIGHTING
+        ═══════════════════════════════════════════ */
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        dirLight.position.set(120, 250, 150);
+        dirLight.castShadow = true;
+        dirLight.shadow.mapSize.width = 2048;
+        dirLight.shadow.mapSize.height = 2048;
+        dirLight.shadow.camera.near = 10;
+        dirLight.shadow.camera.far = 700;
+        dirLight.shadow.camera.left = -300;
+        dirLight.shadow.camera.right = 300;
+        dirLight.shadow.camera.top = 300;
+        dirLight.shadow.camera.bottom = -300;
+        dirLight.shadow.bias = -0.0003;
+        scene.add(dirLight);
+
+        const hemiLight = new THREE.HemisphereLight(0x87ceeb, 0x3a5f0b, 0.35);
+        scene.add(hemiLight);
+
+        /* ═══════════════════════════════════════════
+           FLOOR GRID
+        ═══════════════════════════════════════════ */
+        const gridHelper = new THREE.GridHelper(600, 40, 0x50B8B8, 0x50B8B8);
+        gridHelper.material.opacity = 0.22;
+        gridHelper.material.transparent = true;
+        gridHelper.position.y = -0.5;
+        scene.add(gridHelper);
+
+        /* ground plane for shadow catching */
+        const groundGeo = new THREE.PlaneGeometry(600, 600);
+        const groundMat = new THREE.ShadowMaterial({ opacity: 0.12 });
+        const ground = new THREE.Mesh(groundGeo, groundMat);
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = -0.5;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        /* ═══════════════════════════════════════════
+           MOCK KPI DATA 
+        ═══════════════════════════════════════════ */
+        const mockKPIs = [
+            { kpi: { label: '투과율', val: 45.2, unit: '%', sub: '설계 기준 42%' }, status: 'warn' },
+            { kpi: { label: '탁도', val: 0.08, unit: 'NTU', sub: '정상 범위' }, status: 'ok' },
+            { kpi: { label: '세정 주기', val: 72, unit: 'h', sub: '다음 세정 12h 후' }, status: 'ok' },
+            { kpi: { label: '에너지 효율', val: 96.1, unit: '%', sub: '최적 범위' }, status: 'ok' },
+            { kpi: { label: '유입 유량', val: 1200, unit: 'm³/h', sub: '정상 가동' }, status: 'ok' },
+            { kpi: { label: '농축 배율', val: 2.5, unit: 'x', sub: '주의 기준 초과' }, status: 'err' }
+        ];
+
+        /* ═══════════════════════════════════════════
+           GLB MODEL LOADER
+        ═══════════════════════════════════════════ */
+        const raycasterTargets = [];
+        const eqInfoCardObjects = []; // 설비별 정보 카드 CSS2DObject 참조 배열
+        const loader = new GLTFLoader();
+
+        // ── Equipment Name Tags (선언을 로더 밖으로 이동 — selectGLBMesh에서도 참조) ──
+        const equipmentTags = [
+            { mesh: 'Chemical Dosing Tank', id: 'CDT-101', name: 'Chemical Dosing Tank', kpi: 'pH 7.2', pct: 0.72, color: '#50B8B8', type: 'bar' },
+            { mesh: 'SWRO', id: 'RO-201', name: 'SWRO', kpi: '회수율 45%', pct: 0.45, color: '#3978B8', type: 'bar' },
+            { mesh: 'Ca, Mg Recovery', id: 'MR-401', name: 'Ca, Mg Recovery', kpi: '회수율 82%', pct: 0.82, color: '#73CF79', type: 'ring' },
+            { mesh: 'Control Panel', id: 'CP-001', name: 'Control Panel', kpi: '가동률 98.5%', pct: 0.985, color: '#73CF79', type: 'spark' },
+            { mesh: 'HP Pump 01', id: 'PP-101', name: 'HP Pump 01', kpi: '토출압 68 bar', pct: 0.68, color: '#50B8B8', type: 'gauge' },
+            { mesh: 'DMF', id: 'DMF-101', name: 'DMF', kpi: '탁도 0.08 NTU', pct: 0.12, color: '#73CF79', type: 'bar' },
+            { mesh: 'Br Recovery', id: 'BR-501', name: 'Br Recovery', kpi: '회수율 76%', pct: 0.76, color: '#50B8B8', type: 'ring' },
+            { mesh: 'OARO', id: 'OA-301', name: 'OARO', kpi: '회수율 92%', pct: 0.92, color: '#73CF79', type: 'bar' },
+            { mesh: 'Permeate Tank', id: 'PT-601', name: 'Permeate Tank', kpi: '수위 75%', pct: 0.75, color: '#73CF79', type: 'bar' },
+            // { mesh: 'HP Pump 02', id: 'PP-201', name: 'HP Pump 02', kpi: '토출압 72 bar', pct: 0.72, color: '#50B8B8', type: 'gauge' },
+            { mesh: 'ERD', id: 'ER-101', name: 'ERD', kpi: '효율 96%', pct: 0.96, color: '#73CF79', type: 'ring' },
+            { mesh: 'HPRO', id: 'HR-201', name: 'HPRO', kpi: '회수율 60%', pct: 0.60, color: '#3978B8', type: 'bar' },
+        ];
+
+        loader.load('models/seperated.glb', function (gltf) {
+            const model = gltf.scene;
+
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                    raycasterTargets.push(child);
+
+                    if (child.material) {
+                        child.material.transparent = false;
+                        child.material.opacity = 1;
+                        child.material.depthWrite = true;
+
+                        if (child.material.map) {
+                            child.material.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+                            child.material.map.minFilter = THREE.LinearMipmapLinearFilter;
+                            child.material.map.magFilter = THREE.LinearFilter;
+                        }
+                    }
+                }
+            });
+
+            model.scale.set(20, 20, 20);
+            model.rotation.y = Math.PI;
+
+            setTimeout(() => {
+                // GLTFLoader sanitizes node names (spaces → underscores, etc.)
+                // Build a lookup that normalizes both sides for reliable matching
+                const nameMap = {};
+                model.traverse((child) => {
+                    if (child.name) {
+                        nameMap[child.name] = child;
+                    }
+                });
+
+                equipmentTags.forEach(eq => {
+                    // Try exact match first, then sanitized variants
+                    const target = nameMap[eq.mesh]
+                        || nameMap[eq.mesh.replace(/ /g, '_')]
+                        || nameMap[eq.mesh.replace(/, /g, '__').replace(/ /g, '_')];
+                    if (target) {
+                        createNameTag(target, eq.id, eq.name, eq.kpi, eq.pct, eq.color, eq.type);
+                    } else {
+                        console.warn('[NameTag] mesh not found:', eq.mesh, '| available:', Object.keys(nameMap).join(', '));
+                    }
+                });
+            }, 500);
+
+
+            scene.add(model);
+        }, undefined, function (error) {
+            console.error('An error happened while loading GLB', error);
+        });
+
+        // ── KPI 시각화 생성 헬퍼 ──
+        function makeBarViz(pct, color) {
+            const h = Math.round(pct * 100);
+            return `<div style="width:14px;height:50px;background:rgba(0,0,0,0.05);border-radius:8px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;border:1px solid rgba(80,184,184,0.2);box-shadow:inset 0 1px 3px rgba(0,0,0,0.05);flex-shrink:0;">
+                <div style="width:100%;height:${h}%;background:linear-gradient(180deg,${color} 0%,${color}99 100%);border-radius:6px;box-shadow:0 0 8px ${color}99;"></div>
+            </div>`;
+        }
+
+        function makeRingViz(pct, color) {
+            const r = 18, stroke = 5;
+            const circ = 2 * Math.PI * r;
+            const dash = circ * pct;
+            const gap = circ - dash;
+            const pctText = Math.round(pct * 100);
+            return `<svg width="46" height="46" viewBox="0 0 46 46" style="flex-shrink:0;">
+                <circle cx="23" cy="23" r="${r}" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="${stroke}"/>
+                <circle cx="23" cy="23" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}"
+                    stroke-dasharray="${dash} ${gap}" stroke-linecap="round"
+                    transform="rotate(-90 23 23)" style="filter:drop-shadow(0 0 4px ${color}99);"/>
+                <text x="23" y="24" text-anchor="middle" dominant-baseline="middle"
+                    style="font-size:11px;font-weight:700;fill:${color};font-family:'Plus Jakarta Sans',sans-serif;">${pctText}</text>
+            </svg>`;
+        }
+
+        function makeGaugeViz(pct, color) {
+            const r = 18, stroke = 5;
+            const halfCirc = Math.PI * r;
+            const dash = halfCirc * pct;
+            const gap = halfCirc - dash;
+            const pctText = Math.round(pct * 100);
+            return `<svg width="46" height="30" viewBox="0 0 46 30" style="flex-shrink:0;">
+                <path d="M 5 26 A 18 18 0 0 1 41 26" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="${stroke}" stroke-linecap="round"/>
+                <path d="M 5 26 A 18 18 0 0 1 41 26" fill="none" stroke="${color}" stroke-width="${stroke}"
+                    stroke-dasharray="${dash} ${gap}" stroke-linecap="round"
+                    style="filter:drop-shadow(0 0 4px ${color}99);"/>
+                <text x="23" y="24" text-anchor="middle"
+                    style="font-size:10px;font-weight:700;fill:${color};font-family:'Plus Jakarta Sans',sans-serif;">${pctText}%</text>
+            </svg>`;
+        }
+
+        function makeSparkViz(color) {
+            const pts = [12, 8, 14, 10, 16, 11, 15, 13, 17, 14];
+            const pathD = pts.map((y, i) => `${i === 0 ? 'M' : 'L'}${i * 5 + 2} ${20 - y}`).join(' ');
+            return `<svg width="50" height="22" viewBox="0 0 50 22" style="flex-shrink:0;">
+                <path d="${pathD}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    style="filter:drop-shadow(0 0 3px ${color}99);"/>
+            </svg>`;
+        }
+
+        // ── 3D 네임태그 생성 및 부착 ──
+        function createNameTag(mesh, title, subtitle, kpi, pct, color, vizType) {
+            const div = document.createElement('div');
+            div.className = 'eq-tag-3d';
+
+            let vizHtml = '';
+            if (vizType === 'bar') vizHtml = makeBarViz(pct, color);
+            else if (vizType === 'ring') vizHtml = makeRingViz(pct, color);
+            else if (vizType === 'gauge') vizHtml = makeGaugeViz(pct, color);
+            else if (vizType === 'spark') vizHtml = makeSparkViz(color);
+
+            div.innerHTML = `
+                <div style="display:flex;align-items:center;gap:12px;padding:2px 4px;">
+                    <div style="display:flex;flex-direction:column;align-items:flex-start;text-align:left;">
+                        <div class="tag-title">${title}</div>
+                        <div class="tag-sub">${subtitle}</div>
+                        <div style="margin-top:4px;font-size:12px;font-weight:700;color:${color};display:flex;align-items:center;gap:5px;">
+                            <span style="display:inline-block;width:6px;height:6px;background:${color};border-radius:50%;box-shadow:0 0 6px ${color};"></span>
+                            ${kpi}
+                        </div>
+                    </div>
+                    ${vizHtml}
+                </div>
+            `;
+
+            const label = new CSS2DObject(div);
+
+            const box = new THREE.Box3().setFromObject(mesh);
+            const center = new THREE.Vector3();
+            box.getCenter(center);
+
+            label.position.set(center.x, box.max.y + 5, center.z);
+            scene.add(label);
+            eqInfoCardObjects.push(label);
+        }
+
+        /* ═══════════════════════════════════════════
+           SELECTION & INTERACTION STATE
+        ═══════════════════════════════════════════ */
+        let selectedId = null;
+        let lastHitPoint = null;
+        let activeEqData = null;
+
+        let zooming = false;
+        let zoomStartPos = null;
+        let zoomStartQuat = null;
+        let zoomEndPos = null;
+        let zoomEndQuat = null;
+        let zoomProgress = 0;
+
+        const radialMenu = document.getElementById('radial-menu');
+        const labelsContainer = document.getElementById('labels-container');
+        const hintText = document.getElementById('hint-text');
+        const escHint = document.getElementById('esc-hint');
+
+        // Clear static labels container just in case
+        if (labelsContainer) labelsContainer.innerHTML = '';
+
+        /* ═══════════════════════════════════════════
+           RADIAL MENU
+        ═══════════════════════════════════════════ */
+        function positionRadialMenu() {
+            if (!lastHitPoint) return;
+            const screenPos = lastHitPoint.clone().project(camera);
+
+            // Only show if the point is in front of the camera
+            if (screenPos.z > 1.0) {
+                radialMenu.style.display = 'none';
+                return;
+            } else {
+                radialMenu.style.display = 'block';
+            }
+
+            // body는 1920x1080 고정, fitViewport()로 스케일링되므로 body 좌표계 기준으로 변환
+            const sx = screenPos.x * 960 + 960;
+            const sy = -screenPos.y * 540 + 540;
+
+            radialMenu.style.left = sx + 'px';
+            radialMenu.style.top = (sy - 20) + 'px';
+        }
+
+        function showRadialMenu() {
+            positionRadialMenu();
+            radialMenu.classList.add('active');
+        }
+        function hideRadialMenu() { radialMenu.classList.remove('active'); }
+
+        /* ═══════════════════════════════════════════
+           DETAIL PANEL
+        ═══════════════════════════════════════════ */
+        const panel = document.getElementById('detail-panel');
+
+        function showPanel(eq) {
+            document.getElementById('ph-id').textContent = eq.id;
+            document.getElementById('ph-name').textContent = eq.name;
+            const badge = document.getElementById('ph-status');
+            if (badge) {
+                badge.textContent = eq.status === 'ok' ? '정상' : eq.status === 'warn' ? '주의' : '경보';
+                badge.className = 'status-badge ' + (eq.status === 'ok' ? 's-ok' : eq.status === 'warn' ? 's-warn' : 's-err');
+            }
+
+            // 패널(440px, 우측)이 열리면 카메라를 우측으로 평행 이동 (방향 유지)
+            if (lastHitPoint) {
+                zoomStartPos = camera.position.clone();
+                zoomStartQuat = camera.quaternion.clone();
+
+                // 카메라 로컬 right 벡터 방향으로 위치만 이동, 방향(quaternion)은 그대로 유지
+                const right = new THREE.Vector3();
+                camera.getWorldDirection(new THREE.Vector3());
+                right.setFromMatrixColumn(camera.matrixWorld, 0).normalize();
+                zoomEndPos = camera.position.clone().add(right.multiplyScalar(20));
+                zoomEndQuat = camera.quaternion.clone(); // 방향 변경 없음
+
+                zoomProgress = 0;
+                zooming = true;
+            }
+
+            document.getElementById('wf-badge')?.classList.add('hidden-ui');
+            document.getElementById('wf-badge-error')?.classList.add('hidden-ui');
+
+            drawGauge();
+            drawSparkline();
+
+            panel.classList.remove('hidden');
+        }
+
+        function hidePanel() {
+            panel.classList.add('hidden');
+            // camera.clearViewOffset();
+            // camera.updateProjectionMatrix();
+
+            document.getElementById('wf-badge')?.classList.remove('hidden-ui');
+            document.getElementById('wf-badge-error')?.classList.remove('hidden-ui');
+        }
+
+        document.querySelector('.ph-close')?.addEventListener('click', () => { deselect(); });
+
+        /* ═══════════════════════════════════════════
+           GAUGE DRAWING
+        ═══════════════════════════════════════════ */
+        function drawGauge() {
+            const cv = document.getElementById('gauge-canvas');
+            if (!cv) return;
+            const c = cv.getContext('2d');
+            const W = cv.width = 240;
+            const H = cv.height = 130;
+            c.clearRect(0, 0, W, H);
+
+            const cx = W / 2, cy = H - 24, r = 85;
+            const startA = Math.PI, endA = 2 * Math.PI;
+
+            // Mocking visual values to match screenshot (Red because 2.41 > 2.2)
+            const pct = 0.40; // Approx location
+            const valA = startA + pct * Math.PI;
+
+            c.lineWidth = 14;
+            c.lineCap = 'round';
+
+            // Background track
+            c.beginPath();
+            c.arc(cx, cy, r, startA, endA);
+            c.strokeStyle = '#EBECEE'; // Soft gray
+            c.stroke();
+
+            // Value track
+            c.beginPath();
+            c.arc(cx, cy, r, startA, valA);
+            c.strokeStyle = '#EF4444'; // Red alert
+            c.stroke();
+
+            // Target marker text
+            const targetPct = 0.28;
+            const targetA = startA + targetPct * Math.PI;
+            const tx = cx + (r + 20) * Math.cos(targetA);
+            const ty = cy + (r + 20) * Math.sin(targetA);
+
+            c.font = "bold 11.5px 'Plus Jakarta Sans', sans-serif";
+            c.fillStyle = '#EF4444';
+            c.textAlign = "center";
+            c.fillText("목표 ≤ 2.2", tx + 18, ty - 2);
+
+            // Min/Max Text
+            c.font = "500 11px 'Plus Jakarta Sans', sans-serif";
+            c.fillStyle = '#A0ABB8';
+            c.fillText("1.5", cx - r, cy + 18);
+            c.fillText("3.5", cx + r, cy + 18);
+        }
+
+        /* ═══════════════════════════════════════════
+           SPARKLINE DRAWING
+        ═══════════════════════════════════════════ */
+        function drawSparkline() {
+            const cv = document.getElementById('spark-canvas'); // FIXED ID
+            if (!cv) return;
+            const c = cv.getContext('2d');
+            const W = cv.width = (cv.parentElement.clientWidth > 0 ? cv.parentElement.clientWidth : 392);
+            const H = cv.height = 70;
+            c.clearRect(0, 0, W, H);
+
+            const N = 60;
+            const data = [];
+            let v = 50 + Math.random() * 20;
+            for (let i = 0; i < N; i++) {
+                v += (Math.random() - 0.48) * 5;
+                v = Math.max(20, Math.min(90, v));
+                data.push(v);
+            }
+            const minV = Math.min(...data) - 5;
+            const maxV = Math.max(...data) + 5;
+
+            c.beginPath();
+            data.forEach((d, i) => {
+                const px = i / (N - 1) * W;
+                const py = H - ((d - minV) / (maxV - minV)) * H;
+                i === 0 ? c.moveTo(px, py) : c.lineTo(px, py);
+            });
+            c.strokeStyle = '#60C19A';
+            c.lineWidth = 2.5;
+            c.lineCap = 'round';
+            c.lineJoin = 'round';
+            c.stroke();
+
+            /* fill under */
+            c.lineTo(W, H);
+            c.lineTo(0, H);
+            c.closePath();
+
+            const fillGrad = c.createLinearGradient(0, 0, 0, H);
+            fillGrad.addColorStop(0, 'rgba(96, 193, 154, 0.16)');
+            fillGrad.addColorStop(1, 'rgba(96, 193, 154, 0.00)');
+            c.fillStyle = fillGrad;
+            c.fill();
+        }
+
+        /* ═══════════════════════════════════════════
+           CHART RANGE BUTTONS
+        ═══════════════════════════════════════════ */
+        document.querySelectorAll('.chart-range button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.chart-range button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                drawSparkline();
+            });
+        });
+
+        /* ═══════════════════════════════════════════
+           SELECT / DESELECT EQUIPMENT
+        ═══════════════════════════════════════════ */
+        // Build a lookup from mesh/group names to equipmentTags data
+        const eqTagLookup = {};
+        equipmentTags.forEach(eq => {
+            // Index by original name, underscore variant, and comma variant
+            eqTagLookup[eq.mesh] = eq;
+            eqTagLookup[eq.mesh.replace(/ /g, '_')] = eq;
+            eqTagLookup[eq.mesh.replace(/, /g, '__').replace(/ /g, '_')] = eq;
+        });
+
+        function findEquipmentTag(mesh) {
+            // Check the mesh itself, then walk up parents to find a matching group name
+            let node = mesh;
+            while (node) {
+                if (node.name && eqTagLookup[node.name]) return eqTagLookup[node.name];
+                node = node.parent;
+            }
+            return null;
+        }
+
+        function selectGLBMesh(intersect) {
+            const mesh = intersect.object;
+            lastHitPoint = intersect.point.clone();
+
+            selectedId = mesh.uuid;
+            const mKPI = mockKPIs[Math.floor(Math.random() * mockKPIs.length)];
+
+            // Match clicked mesh to equipment tag data
+            const eqTag = findEquipmentTag(mesh);
+
+            activeEqData = eqTag
+                ? { id: eqTag.id, name: eqTag.name, status: mKPI.status, kpi: mKPI.kpi }
+                : { id: mesh.name || 'UNKNOWN', name: mesh.name || '3D 메쉬 파트', status: mKPI.status, kpi: mKPI.kpi };
+
+            showRadialMenu();
+
+            /* zoom to hit point — 설비가 화면 정중앙에 오도록 */
+            zoomStartPos = camera.position.clone();
+            zoomStartQuat = camera.quaternion.clone();
+
+            const offset = new THREE.Vector3(50, 40, 50);
+            zoomEndPos = lastHitPoint.clone().add(offset);
+
+            const dummyCam = camera.clone();
+            dummyCam.position.copy(zoomEndPos);
+            dummyCam.lookAt(lastHitPoint); // 설비를 정면으로 바라봄
+            zoomEndQuat = dummyCam.quaternion.clone();
+
+            zoomProgress = 0;
+            zooming = true;
+
+            if (hintText) hintText.style.opacity = '0';
+            if (escHint) escHint.style.opacity = '1';
+
+            // Hide KPI panels & overlay elements when zooming into details
+            document.querySelector('.kpi-strip')?.classList.add('hidden-ui');
+            eqInfoCardObjects.forEach(obj => { obj.visible = false; });
+        }
+
+        function deselect() {
+            selectedId = null;
+            lastHitPoint = null;
+            activeEqData = null;
+            hideRadialMenu();
+            hidePanel();
+
+            /* zoom back to default */
+            zoomStartPos = camera.position.clone();
+            zoomStartQuat = camera.quaternion.clone();
+
+            zoomEndPos = new THREE.Vector3(200, 210, 400);
+            const dummyCam = camera.clone();
+            dummyCam.position.copy(zoomEndPos);
+            dummyCam.lookAt(50, 25, 0);
+            zoomEndQuat = dummyCam.quaternion.clone();
+
+            zoomProgress = 0;
+            zooming = true;
+
+            if (hintText) hintText.style.opacity = '1';
+            if (escHint) escHint.style.opacity = '0';
+
+            // Show KPI panels & restore overlay elements when returning to global view
+            document.querySelector('.kpi-strip')?.classList.remove('hidden-ui');
+            // 설비별 정보 카드: 레이어 패널 체크 상태에 따라 복원
+            const eqCardRow = document.querySelector('.lp-row[data-layer="eq-info-card"]');
+            const eqCardOn = eqCardRow ? eqCardRow.querySelector('input.lp-cb').checked : true;
+            if (eqCardOn) eqInfoCardObjects.forEach(obj => { obj.visible = true; });
+        }
+
+        /* ESC key / hint click */
+        document.addEventListener('keydown', e => { if (e.key === 'Escape' && selectedId) deselect(); });
+        escHint?.addEventListener('click', () => { if (selectedId) deselect(); });
+
+        /* Expose camera reset for control board close */
+        window.resetCameraToGlobal = function () {
+            deselect();
+        };
+
+        /* ═══════════════════════════════════════════
+           RAYCASTING & FIRST-PERSON CONTROLS
+        ═══════════════════════════════════════════ */
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        let isDragging = false;
+        let mouseDownPos = { x: 0, y: 0 };
+
+        renderer.domElement.addEventListener('pointerdown', e => {
+            mouseDownPos = { x: e.clientX, y: e.clientY };
+            isDragging = false;
+
+            if (e.button === 0) {
+                camState.isPanning = true;   // 좌클릭 → 이동
+            } else if (e.button === 1) {
+                camState.isLooking = true;   // 휠클릭 → 회전
+            }
+            renderer.domElement.setPointerCapture(e.pointerId);
+        });
+
+        renderer.domElement.addEventListener('pointermove', e => {
+            const dx = e.clientX - mouseDownPos.x;
+            const dy = e.clientY - mouseDownPos.y;
+            if (Math.abs(dx) > 4 || Math.abs(dy) > 4) isDragging = true;
+
+            if (!zooming) {
+                if (camState.isLooking && isDragging) {
+                    camState.yaw -= e.movementX * camState.lookSpeed;
+                    camState.pitch -= e.movementY * camState.lookSpeed;
+
+                    camState.pitch = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, camState.pitch));
+
+                    camera.rotation.set(camState.pitch, camState.yaw, 0, 'YXZ');
+                } else if (camState.isPanning && isDragging) {
+                    camera.translateX(-e.movementX * camState.panSpeed);
+                    camera.translateY(e.movementY * camState.panSpeed);
+                }
+            }
+        });
+
+        renderer.domElement.addEventListener('pointerup', e => {
+            if (e.button === 0) camState.isPanning = false;
+            if (e.button === 1) camState.isLooking = false;
+
+            renderer.domElement.releasePointerCapture(e.pointerId);
+
+            if (isDragging) return;
+
+            // Interaction Raycast
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+
+            const intersects = raycaster.intersectObjects(raycasterTargets);
+            if (intersects.length > 0) {
+                selectGLBMesh(intersects[0]);
+            } else {
+                if (selectedId) deselect();
+            }
+        });
+
+        // Wheel Zoom (Dolly)
+        renderer.domElement.addEventListener('wheel', e => {
+            if (!zooming) {
+                const delta = Math.sign(e.deltaY);
+                // Move camera backwards (positive Z local) or forwards (negative Z local)
+                camera.translateZ(delta * camState.zoomSpeed * 20); // adjustable factor
+            }
+            e.preventDefault();
+        }, { passive: false });
+
+        // Disable standard context menu for right-click panning
+        renderer.domElement.addEventListener('contextmenu', e => e.preventDefault());
+
+        /* ═══════════════════════════════════════════
+           CLOCK — shared-navbar.js가 처리
+        ═══════════════════════════════════════════ */
+
+        /* ═══════════════════════════════════════════
+           RESIZE
+        ═══════════════════════════════════════════ */
+        function onResize() {
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+            labelRenderer.setSize(w, h);
+        }
+        window.addEventListener('resize', onResize);
+
+        /* ═══════════════════════════════════════════
+           ANIMATION LOOP
+        ═══════════════════════════════════════════ */
+        function animate() {
+            requestAnimationFrame(animate);
+
+            /* smooth zoom interpolation */
+            if (zooming && zoomEndPos && zoomEndQuat) {
+                zoomProgress += 0.025;
+                if (zoomProgress >= 1) {
+                    zoomProgress = 1;
+                    zooming = false;
+
+                    // synchronize custom camState variables to the new orientation
+                    const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+                    euler.setFromQuaternion(camera.quaternion);
+                    camState.pitch = euler.x;
+                    camState.yaw = euler.y;
+                }
+                const eased = 1 - Math.pow(1 - zoomProgress, 3); /* easeOutCubic */
+                camera.position.lerpVectors(zoomStartPos, zoomEndPos, eased);
+                camera.quaternion.slerpQuaternions(zoomStartQuat, zoomEndQuat, eased);
+            }
+
+            /* keep radial menu positioned if selected */
+            if (selectedId) positionRadialMenu();
+
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+
+        /* ═══════════════════════════════════════════
+           RADIAL MENU INITIALIZATION
+        ═══════════════════════════════════════════ */
+        function initRadialMenu() {
+            const slicesGroup = document.getElementById('radial-slices');
+            slicesGroup.innerHTML = ''; // prevent duplicates
+
+            const items = [
+                { label: '상세 정보', icon: '📋' },
+                { label: '운전 상태', icon: '⚡' },
+                { label: '경보 이력', icon: '⚠️' },
+                { label: '제어 보드', icon: '⚙️' },
+                { label: '도면 보기', icon: '📐' },
+                { label: '유지 보수', icon: '🔧' }
+            ];
+
+            const cx = 130, cy = 130;
+            const rIn = 40, rOut = 125;
+            const angleStep = (Math.PI * 2) / items.length;
+
+            items.forEach((item, i) => {
+                const startAngle = i * angleStep - Math.PI / 2;
+                const endAngle = (i + 1) * angleStep - Math.PI / 2;
+
+                const pad = 0.02; // slight gap between slices
+                const x1 = cx + rOut * Math.cos(startAngle + pad);
+                const y1 = cy + rOut * Math.sin(startAngle + pad);
+                const x2 = cx + rOut * Math.cos(endAngle - pad);
+                const y2 = cy + rOut * Math.sin(endAngle - pad);
+                const x3 = cx + rIn * Math.cos(endAngle - pad);
+                const y3 = cy + rIn * Math.sin(endAngle - pad);
+                const x4 = cx + rIn * Math.cos(startAngle + pad);
+                const y4 = cy + rIn * Math.sin(startAngle + pad);
+
+                const midAngle = (startAngle + endAngle) / 2;
+                const tx = cx + ((rIn + rOut) / 2) * Math.cos(midAngle);
+                const ty = cy + ((rIn + rOut) / 2) * Math.sin(midAngle);
+
+                const largeArc = endAngle - startAngle > Math.PI ? 1 : 0;
+
+                const pathData = [
+                    `M ${x1} ${y1}`,
+                    `A ${rOut} ${rOut} 0 ${largeArc} 1 ${x2} ${y2}`,
+                    `L ${x3} ${y3}`,
+                    `A ${rIn} ${rIn} 0 ${largeArc} 0 ${x4} ${y4}`,
+                    `Z`
+                ].join(' ');
+
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                g.setAttribute('class', 'radial-g');
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', pathData);
+                path.setAttribute('class', 'slice');
+
+                const iconTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                iconTxt.setAttribute('x', tx);
+                iconTxt.setAttribute('y', ty - 8);
+                // Override fill/stroke to display emojis properly while inheriting hover scale/color via css later if needed
+                iconTxt.setAttribute('style', 'text-anchor: middle; font-size: 18px; pointer-events: none;');
+                iconTxt.textContent = item.icon;
+
+                const labelTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                labelTxt.setAttribute('x', tx);
+                labelTxt.setAttribute('y', ty + 12);
+                labelTxt.setAttribute('class', 'slice-text');
+                labelTxt.textContent = item.label;
+
+                g.appendChild(path);
+                g.appendChild(iconTxt);
+                g.appendChild(labelTxt);
+                slicesGroup.appendChild(g);
+
+                const onSliceClick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation(); // prevent default canvas deselect
+                    if (item.label === '상세 정보') {
+                        // Open the detail panel for the selected equipment
+                        if (activeEqData) {
+                            showPanel(activeEqData);
+                            hideRadialMenu();
+                        } else {
+                            showPanel({ id: selectedId || 'DT-EQ-001', name: '가압 펌프', status: 'ok', kpi: { val: 2.1, sub: '현재 SEC' } });
+                            hideRadialMenu();
+                        }
+                    } else if (item.label === '제어 보드') {
+                        showControlBoard(activeEqData);
+                        hideRadialMenu();
+                    } else {
+                        alert(`[${item.label}] 메뉴는 아직 준비 중입니다.`);
+                    }
+                };
+                g.addEventListener('click', onSliceClick);
+                g.addEventListener('pointerdown', onSliceClick);
+            });
+        }
+        initRadialMenu();
+
+        /* center circle: deselect */
+        document.querySelector('.menu-center')?.addEventListener('click', () => { deselect(); });
+
+        /* ═══════════════════════════════════════════
+           KEYBOARD SHORTCUTS
+        ═══════════════════════════════════════════ */
+        window.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                deselect();
+            }
+        });
+
+        /* ═══════════════════════════════════════════
+           INIT (FLY-IN ANIMATION)
+        ═══════════════════════════════════════════ */
+        // 카메라 초기 위치는 상단에서 설정됨 (300, 400, 500)
+        // deselect()가 도착점 (200, 210, 400) → lookAt(0, 25, 0)으로 애니메이션
+        setTimeout(() => {
+            deselect();
+        }, 300);
+
+        animate();
+
+        /* ═══════════════════════════════════════════
+           KPI OVERLAY LOGIC
+        ═══════════════════════════════════════════ */
+        function updateKPI(cardId, data) {
+            const card = document.getElementById(cardId);
+            if (!card) return;
+
+            // Remove existing state classes
+            card.classList.remove('state-ok', 'state-warn', 'state-danger');
+
+            // Add new state class
+            card.classList.add(`state-${data.state}`);
+
+            // Update value with animation
+            const valEl = card.querySelector('.kpi-value');
+            if (valEl && valEl.textContent !== data.value) {
+                valEl.textContent = data.value;
+                valEl.classList.remove('val-update');
+                void valEl.offsetWidth; // trigger reflow
+                valEl.classList.add('val-update');
+            }
+
+            // Update trend if exists
+            const trendEl = card.querySelector('.kpi-trend');
+            if (trendEl && data.trend) {
+                trendEl.textContent = data.trend.text;
+                trendEl.className = `kpi-trend trend-${data.trend.dir}`;
+                // For flow rate, an UP trend is actually good
+                if (cardId === 'kpi-flow' && data.trend.dir === 'up' && data.state === 'ok') {
+                    trendEl.style.background = 'rgba(115, 207, 121, 0.15)';
+                    trendEl.style.color = '#2E7D32';
+                } else if (cardId === 'kpi-flow' && data.trend.dir === 'down') {
+                    trendEl.style.background = 'rgba(239, 68, 68, 0.12)';
+                    trendEl.style.color = 'var(--danger)';
+                } else {
+                    trendEl.style.background = '';
+                    trendEl.style.color = '';
+                }
+            }
+
+            // Update specific properties
+            if (cardId === 'kpi-quality' && data.margin !== undefined && data.progress !== undefined) {
+                const marginEl = document.getElementById('margin-quality');
+                const progEl = document.getElementById('progress-quality');
+                if (marginEl) marginEl.textContent = `Margin: ${data.margin}`;
+                if (progEl) progEl.style.width = `${data.progress}%`;
+            }
+        }
+
+        // 24 Hour Line Chart Generation Logic
+        function drawKPIChart(canvasId, state, baseVal, variance) {
+            const cv = document.getElementById(canvasId);
+            if (!cv) return;
+            const W = cv.width = cv.parentElement.clientWidth || 270;
+            const H = cv.height = cv.parentElement.clientHeight || 60;
+            const c = cv.getContext('2d');
+            c.clearRect(0, 0, W, H);
+
+            // Generate 24 points reflecting the state
+            const N = 24;
+            const data = [];
+            let v = baseVal;
+            for (let i = 0; i < N; i++) {
+                v += (Math.random() - 0.5) * variance;
+                data.push(v);
+            }
+            data[N - 1] = baseVal;
+
+            const minV = Math.min(...data) - variance * 0.5;
+            const maxV = Math.max(...data) + variance * 0.5;
+
+            c.beginPath();
+            data.forEach((d, i) => {
+                const px = i / (N - 1) * W;
+                const py = H - ((d - minV) / (maxV - minV)) * H;
+                i === 0 ? c.moveTo(px, py) : c.lineTo(px, py);
+            });
+
+            // Status color matching
+            let color = '#60C19A'; // OK green
+            if (state === 'warn') color = '#F59E0B'; // warn orange
+            if (state === 'danger') color = '#EF4444'; // danger red
+
+            c.strokeStyle = color;
+            c.lineWidth = 2.5;
+            c.lineCap = 'round';
+            c.lineJoin = 'round';
+            c.stroke();
+
+            // Fill area below chart
+            c.lineTo(W, H);
+            c.lineTo(0, H);
+            c.closePath();
+
+            let rgbaColor = '96, 193, 154';
+            if (state === 'warn') rgbaColor = '245, 158, 11';
+            if (state === 'danger') rgbaColor = '239, 68, 68';
+
+            const fillGrad = c.createLinearGradient(0, 0, 0, H);
+            fillGrad.addColorStop(0, `rgba(${rgbaColor}, 0.25)`);
+            fillGrad.addColorStop(1, `rgba(${rgbaColor}, 0.0)`);
+            c.fillStyle = fillGrad;
+            c.fill();
+        }
+
+        // Initialize graphs layout
+        setTimeout(() => {
+            drawKPIChart('chart-energy', 'ok', 2.15, 0.1);
+            drawKPIChart('chart-flow', 'ok', 12500, 200);
+            drawKPIChart('chart-quality', 'ok', 185, 5);
+        }, 100);
+
+        // Expose to global scope for scenario buttons
+        window.setKPIScenario = function (scenario) {
+            if (scenario === 'normal') {
+                updateKPI('kpi-energy', { state: 'ok', value: '2.15', trend: { text: '▼ 0.05', dir: 'down' } });
+                updateKPI('kpi-flow', { state: 'ok', value: '12,500', trend: { text: '▲ 500', dir: 'up' } });
+                updateKPI('kpi-quality', { state: 'ok', value: '160', margin: '40', progress: 80 });
+                drawKPIChart('chart-energy', 'ok', 2.15, 0.1);
+                drawKPIChart('chart-flow', 'ok', 12500, 200);
+                drawKPIChart('chart-quality', 'ok', 160, 5);
+                document.getElementById('dock-runtime-current').textContent = '127';
+                document.getElementById('dock-runtime-total').textContent = '1,842';
+            } else if (scenario === 'warning') {
+                updateKPI('kpi-energy', { state: 'warn', value: '2.25', trend: { text: '▲ 0.05', dir: 'up' } });
+                updateKPI('kpi-flow', { state: 'warn', value: '11,600', trend: { text: '▼ 400', dir: 'down' } });
+                updateKPI('kpi-quality', { state: 'warn', value: '195', margin: '5', progress: 97.5 });
+                drawKPIChart('chart-energy', 'warn', 2.25, 0.1);
+                drawKPIChart('chart-flow', 'warn', 11600, 300);
+                drawKPIChart('chart-quality', 'warn', 195, 5);
+                document.getElementById('dock-runtime-current').textContent = '127';
+                document.getElementById('dock-runtime-total').textContent = '1,842';
+            } else if (scenario === 'danger') {
+                updateKPI('kpi-energy', { state: 'danger', value: '2.45', trend: { text: '▲ 0.25', dir: 'up' } });
+                updateKPI('kpi-flow', { state: 'danger', value: '11,000', trend: { text: '▼ 1000', dir: 'down' } });
+                updateKPI('kpi-quality', { state: 'danger', value: '215', margin: '-15', progress: 100 });
+                drawKPIChart('chart-energy', 'danger', 2.45, 0.2);
+                drawKPIChart('chart-flow', 'danger', 11000, 500);
+                drawKPIChart('chart-quality', 'danger', 215, 10);
+                document.getElementById('dock-runtime-current').textContent = '0';
+                document.getElementById('dock-runtime-total').textContent = '1,842';
+            }
+
+            // 공정 플로우 경보 배지 업데이트
+            updateProcessAlarms(scenario);
+        };
+
+        // 공정별 경보 배지 시나리오 데이터
+        function updateProcessAlarms(scenario) {
+            const alarmData = {
+                normal: { intake: [0, 0], pretreat: [0, 0], ro: [0, 0], product: [0, 0] },
+                warning: { intake: [0, 0], pretreat: [1, 0], ro: [1, 0], product: [0, 0] },
+                danger: { intake: [0, 0], pretreat: [1, 1], ro: [2, 1], product: [0, 0] }
+            };
+            const data = alarmData[scenario] || alarmData.normal;
+            document.querySelectorAll('.process-stage').forEach(stage => {
+                const key = stage.dataset.stage;
+                const counts = data[key] || [0, 0];
+                const warnBadge = stage.querySelector('.process-alarm-badge.warn');
+                const dangerBadge = stage.querySelector('.process-alarm-badge.danger');
+                const badgesWrap = stage.querySelector('.process-alarm-badges');
+
+                if (warnBadge) { warnBadge.querySelector('.badge-num').textContent = counts[0]; warnBadge.dataset.count = counts[0]; warnBadge.style.display = counts[0] > 0 ? 'flex' : 'none'; }
+                if (dangerBadge) { dangerBadge.querySelector('.badge-num').textContent = counts[1]; dangerBadge.dataset.count = counts[1]; dangerBadge.style.display = counts[1] > 0 ? 'flex' : 'none'; }
+
+                // 하나라도 알람이 있으면 배지 컨테이너 표시
+                const hasAlarms = counts[0] > 0 || counts[1] > 0;
+                if (badgesWrap) { badgesWrap.classList.toggle('active', hasAlarms); }
+
+            });
+        }
+
+        /* ═══════════════════════════════════════════
+           NAVIGATION — shared-navbar.js가 처리
+        ═══════════════════════════════════════════ */
+
+        /* ═══════════════════════════════════════════
+           LAYER PANEL LOGIC
+        ═══════════════════════════════════════════ */
+        window.toggleLayerPanel = function (btn) {
+            const panel = document.getElementById('layer-panel');
+            const header = panel.querySelector('.lp-header');
+            const collapsed = btn.classList.contains('collapsed');
+
+            if (!collapsed) {
+                // 접기: 현재 높이 고정 후 헤더 높이만큼으로 줄이기
+                panel.style.height = panel.offsetHeight + 'px';
+                requestAnimationFrame(() => {
+                    panel.style.height = header.offsetHeight + 'px';
+                });
+                btn.classList.add('collapsed');
+                btn.title = '패널 펼치기';
+            } else {
+                // 펼치기: auto로 돌아가기 위해 scrollHeight로 전환
+                panel.style.height = panel.scrollHeight + 'px';
+                panel.addEventListener('transitionend', function restoreAuto(e) {
+                    if (e.propertyName === 'height') {
+                        panel.style.height = '';
+                        panel.removeEventListener('transitionend', restoreAuto);
+                    }
+                });
+                btn.classList.remove('collapsed');
+                btn.title = '패널 접기';
+            }
+        };
+
+        window.onLayerChange = function (row, group) {
+            const cb = row.querySelector('input.lp-cb');
+            cb.checked = !cb.checked;
+            row.classList.toggle('dimmed', !cb.checked);
+            // 설비별 정보 카드 레이어 토글 (CSS2DObject.visible 제어)
+            if (row.dataset.layer === 'eq-info-card') {
+                eqInfoCardObjects.forEach(obj => { obj.visible = cb.checked; });
+            }
+            // 전체선택 동기화
+            const allRows = document.querySelectorAll(`.lp-row[data-group="${group}"]`);
+            const cbs = [...allRows].map(r => r.querySelector('input.lp-cb'));
+            const n = cbs.filter(c => c.checked).length;
+            const allCb = document.getElementById('all-' + group);
+            if (n === cbs.length) { allCb.checked = true; allCb.indeterminate = false; }
+            else if (n === 0) { allCb.checked = false; allCb.indeterminate = false; }
+            else { allCb.checked = false; allCb.indeterminate = true; }
+        };
+
+        window.toggleGroup = function (group) {
+            const allRows = document.querySelectorAll(`.lp-row[data-group="${group}"]`);
+            const cbs = [...allRows].map(r => r.querySelector('input.lp-cb'));
+            // 하나라도 체크 해제된 항목이 있으면 전체 선택, 전부 켜져 있으면 전체 해제
+            const newState = cbs.some(c => !c.checked);
+            cbs.forEach(c => { c.checked = newState; });
+            allRows.forEach(r => {
+                r.classList.toggle('dimmed', !newState);
+                // 설비별 정보 카드 레이어 동기화 (CSS2DObject.visible 제어)
+                if (r.dataset.layer === 'eq-info-card') {
+                    eqInfoCardObjects.forEach(obj => { obj.visible = newState; });
+                }
+            });
+            const allCb = document.getElementById('all-' + group);
+            allCb.checked = newState;
+            allCb.indeterminate = false;
+        };
+
+        // 페이지 로드 시 전체선택 체크박스 상태를 하위 항목과 동기화
+        document.addEventListener('DOMContentLoaded', function () {
+            ['process', 'overlay'].forEach(function (group) {
+                const allRows = document.querySelectorAll(`.lp-row[data-group="${group}"]`);
+                const cbs = [...allRows].map(r => r.querySelector('input.lp-cb'));
+                const n = cbs.filter(c => c.checked).length;
+                const allCb = document.getElementById('all-' + group);
+                if (n === cbs.length) { allCb.checked = true; allCb.indeterminate = false; }
+                else if (n === 0) { allCb.checked = false; allCb.indeterminate = false; }
+                else { allCb.checked = false; allCb.indeterminate = true; }
+                // dimmed 상태도 초기화
+                allRows.forEach(r => {
+                    const cb = r.querySelector('input.lp-cb');
+                    r.classList.toggle('dimmed', !cb.checked);
+                });
+            });
+
+            // 초기 상태: 공정 플로우 경보 배지 숨김 (normal = 알람 0)
+            updateProcessAlarms('normal');
+        });
+
+    </script>
+
+    <!-- Process Nav Bar interaction -->
+    <script>
+        document.querySelectorAll('.process-stage').forEach(el => {
+            el.addEventListener('click', () => {
+                document.querySelectorAll('.process-stage').forEach(s => s.classList.remove('active'));
+                el.classList.add('active');
+            });
+        });
+    </script>
+
+    <!-- ═══════════════════════════════════════════
+         CONTROL BOARD LOGIC
+    ═══════════════════════════════════════════ -->
+    <script>
+        (function () {
+            const cbEl = document.getElementById('control-board');
+            let cbTimerInterval = null;
+            let cbTrendInterval = null;
+
+            /* ── HP Pump Data Model ── */
+            const hpPumpData = {
+                state: 'running',        // running | stopped | fault
+                mode: 'auto',            // auto | manual
+                runtime: 12847,          // hours
+                // Process parameters
+                suctionPressure: 3.2,    // bar
+                dischargePressure: 62.5, // bar
+                diffPressure: 59.3,      // bar
+                feedFlow: 425.8,         // m³/h
+                recoveryRate: 45.2,      // %
+                feedTemp: 26.3,          // °C
+                feedTDS: 38500,          // mg/L
+                // Motor / VFD
+                vfdFreq: 48.2,           // Hz
+                motorSpeed: 2892,        // rpm
+                motorCurrent: 186.4,     // A
+                motorPower: 342.7,       // kW
+                bearingTempDE: 62.1,     // °C (Drive End)
+                bearingTempNDE: 58.4,    // °C (Non-Drive End)
+                vibrationDE: 2.8,        // mm/s
+                vibrationNDE: 2.1,       // mm/s
+                windingTemp: 78.5,       // °C
+                // Valves
+                suctionValve: 100,       // % open
+                dischargeValve: 100,     // % open
+                // PID
+                pidSP: 62.0, pidPV: 62.5, pidOutput: 78,
+                // Seal
+                sealWaterFlow: 4.2,      // L/min
+                lubeOilPressure: 2.8,    // bar
+                lubeOilTemp: 48.2,       // °C
+            };
+
+            /* ── Interlock Data ── */
+            const interlocks = [
+                { name: '고압 트립 (>70 bar)', status: 'safe' },
+                { name: '저흡입 압력 (<1.5 bar)', status: 'safe' },
+                { name: '고진동 DE (>7.1 mm/s)', status: 'safe' },
+                { name: '고진동 NDE (>7.1 mm/s)', status: 'safe' },
+                { name: '모터 과부하', status: 'safe' },
+                { name: '베어링 고온 (>85°C)', status: 'safe' },
+                { name: '권선 고온 (>120°C)', status: 'safe' },
+                { name: '윤활유 저압', status: 'safe' },
+                { name: '씰워터 유량 저하', status: 'safe' },
+                { name: '비상 정지 (E-STOP)', status: 'safe' },
+            ];
+
+            /* ── Alarm Data ── */
+            const alarms = [
+                { level: 'warn', time: '14:28:03', msg: 'DE 베어링 온도 상승 (62.1°C)' },
+                { level: 'warn', time: '14:15:42', msg: '토출압 미세 변동 (±0.5 bar/10min)' },
+                { level: 'warn', time: '13:52:11', msg: '윤활유 온도 주의 (48.2°C)' },
+            ];
+
+            /* ── Trend history ── */
+            const trendHistory = {
+                pressure: Array.from({ length: 60 }, (_, i) => 62.0 + Math.sin(i * 0.15) * 0.8 + (Math.random() - 0.5) * 0.3),
+                flow: Array.from({ length: 60 }, (_, i) => 425 + Math.sin(i * 0.1) * 5 + (Math.random() - 0.5) * 2),
+            };
+
+            /* ── Render Status Banner ── */
+            function renderStatusBanner() {
+                const d = hpPumpData;
+                const stateLabel = d.state === 'running' ? '가동중' : d.state === 'stopped' ? '정지' : '고장';
+                document.getElementById('cb-status-banner').innerHTML = `
+                    <div class="cb-state-badge ${d.state}">
+                        <div class="cb-state-dot"></div>
+                        ${stateLabel}
+                    </div>
+                    <div class="cb-op-mode">
+                        운전 모드: <span class="cb-mode-chip ${d.mode}">${d.mode === 'auto' ? 'AUTO' : 'MANUAL'}</span>
+                    </div>
+                    <div class="cb-runtime">누적 운전: ${d.runtime.toLocaleString()} h</div>
+                    <div class="cb-start-stop">
+                        <button class="cb-btn-start" ${d.state === 'running' ? 'disabled' : ''}>START</button>
+                        <button class="cb-btn-stop" ${d.state !== 'running' ? 'disabled' : ''}>STOP</button>
+                    </div>
+                `;
+                document.querySelector('.cb-btn-start')?.addEventListener('click', () => {
+                    hpPumpData.state = 'running';
+                    renderAll();
+                });
+                document.querySelector('.cb-btn-stop')?.addEventListener('click', () => {
+                    hpPumpData.state = 'stopped';
+                    renderAll();
+                });
+            }
+
+            /* ── Render Left: Process Parameters ── */
+            function renderLeftParams() {
+                const d = hpPumpData;
+                return `
+                <div class="cb-params-col">
+                    <div class="cb-param-group">
+                        <div class="cb-param-group-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg>
+                            압력 계측
+                        </div>
+                        <div class="cb-param-row">
+                            <span class="cb-param-name">흡입 압력</span>
+                            <span class="cb-param-value">${d.suctionPressure}<span class="unit"> bar</span></span>
+                        </div>
+                        <div class="cb-param-row">
+                            <span class="cb-param-name">토출 압력</span>
+                            <span class="cb-param-value" style="font-size:16px;font-weight:600;color:#3978B8">${d.dischargePressure}<span class="unit"> bar</span></span>
+                        </div>
+                        <div class="cb-param-row">
+                            <span class="cb-param-name">차압 (ΔP)</span>
+                            <span class="cb-param-value">${d.diffPressure}<span class="unit"> bar</span></span>
+                        </div>
+                    </div>
+
+                    <div class="cb-param-group">
+                        <div class="cb-param-group-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 6v6l4 2"/></svg>
+                            유량·공정
+                        </div>
+                        <div class="cb-param-row">
+                            <span class="cb-param-name">급수 유량</span>
+                            <span class="cb-param-value">${d.feedFlow}<span class="unit"> m³/h</span></span>
+                        </div>
+                        <div class="cb-param-row">
+                            <span class="cb-param-name">회수율</span>
+                            <span class="cb-param-value ok">${d.recoveryRate}<span class="unit"> %</span></span>
+                        </div>
+                        <div class="cb-param-row">
+                            <span class="cb-param-name">급수 온도</span>
+                            <span class="cb-param-value">${d.feedTemp}<span class="unit"> °C</span></span>
+                        </div>
+                        <div class="cb-param-row">
+                            <span class="cb-param-name">급수 TDS</span>
+                            <span class="cb-param-value">${d.feedTDS.toLocaleString()}<span class="unit"> mg/L</span></span>
+                        </div>
+                    </div>
+
+                    <div class="cb-param-group">
+                        <div class="cb-param-group-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/></svg>
+                            밸브 상태
+                        </div>
+                        <div class="cb-param-row">
+                            <span class="cb-param-name">흡입 밸브 (V-100)</span>
+                            <span class="cb-param-value ok">${d.suctionValve}<span class="unit"> %</span></span>
+                        </div>
+                        <div class="cb-param-row">
+                            <span class="cb-param-name">토출 밸브 (V-101)</span>
+                            <span class="cb-param-value ok">${d.dischargeValve}<span class="unit"> %</span></span>
+                        </div>
+                    </div>
+
+                    <div class="cb-param-group">
+                        <div class="cb-param-group-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10z"/><path d="M12 6v6"/></svg>
+                            씰·윤활
+                        </div>
+                        <div class="cb-param-row">
+                            <span class="cb-param-name">씰워터 유량</span>
+                            <span class="cb-param-value">${d.sealWaterFlow}<span class="unit"> L/min</span></span>
+                        </div>
+                        <div class="cb-param-row">
+                            <span class="cb-param-name">윤활유 압력</span>
+                            <span class="cb-param-value">${d.lubeOilPressure}<span class="unit"> bar</span></span>
+                        </div>
+                        <div class="cb-param-row">
+                            <span class="cb-param-name">윤활유 온도</span>
+                            <span class="cb-param-value${d.lubeOilTemp > 45 ? ' warn' : ''}">${d.lubeOilTemp}<span class="unit"> °C</span></span>
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            /* ── Render Center: Mimic + Speed Control + PID + Trend ── */
+            function renderCenter() {
+                const d = hpPumpData;
+                const pidErr = (d.pidPV - d.pidSP).toFixed(2);
+                return `
+                <div class="cb-center-col">
+                    <!-- Mimic Diagram -->
+                    <div class="cb-mimic-card">
+                        <div class="cb-section-title">P&ID 간략도 — HP PUMP SYSTEM</div>
+                        <svg class="cb-mimic-svg" viewBox="0 0 800 220">
+                            <!-- Background grid -->
+                            <defs>
+                                <pattern id="cb-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(80,184,184,0.06)" stroke-width="0.5"/>
+                                </pattern>
+                                <linearGradient id="cb-pipe-grad" x1="0" y1="0" x2="1" y2="0">
+                                    <stop offset="0%" stop-color="#50B8B8" stop-opacity="0.3"/>
+                                    <stop offset="100%" stop-color="#3978B8" stop-opacity="0.3"/>
+                                </linearGradient>
+                                <linearGradient id="cb-pump-grad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#50B8B8"/>
+                                    <stop offset="100%" stop-color="#3978B8"/>
+                                </linearGradient>
+                                <marker id="cb-flow-arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                                    <path d="M0,0 L8,3 L0,6" fill="#50B8B8" opacity="0.6"/>
+                                </marker>
+                            </defs>
+                            <rect width="800" height="220" fill="url(#cb-grid)"/>
+
+                            <!-- From Pre-treatment label -->
+                            <text x="20" y="118" font-size="10" fill="#7A9EAB" font-family="JetBrains Mono">전처리 →</text>
+
+                            <!-- Suction piping -->
+                            <line x1="80" y1="115" x2="180" y2="115" stroke="url(#cb-pipe-grad)" stroke-width="10" stroke-linecap="round"/>
+                            <!-- Flow arrows -->
+                            <line x1="100" y1="115" x2="150" y2="115" stroke="#50B8B8" stroke-width="1" marker-end="url(#cb-flow-arrow)" opacity="0.5"/>
+
+                            <!-- Suction Valve V-100 -->
+                            <rect x="175" y="100" width="30" height="30" rx="4" fill="white" stroke="rgba(80,184,184,0.3)" stroke-width="1.5"/>
+                            <path d="M183,115 L197,107 L197,123 Z" fill="${d.suctionValve > 50 ? '#73CF79' : '#F59E0B'}" opacity="0.7"/>
+                            <text x="190" y="96" text-anchor="middle" font-size="9" fill="#7A9EAB" font-family="JetBrains Mono">V-100</text>
+                            <text x="190" y="142" text-anchor="middle" font-size="9" fill="#2E7D32" font-family="JetBrains Mono">${d.suctionValve}%</text>
+
+                            <!-- Suction pressure gauge -->
+                            <circle cx="240" y="115" r="16" cy="115" fill="white" stroke="rgba(80,184,184,0.25)" stroke-width="1.5"/>
+                            <text x="240" y="112" text-anchor="middle" font-size="8" fill="#7A9EAB" font-family="JetBrains Mono">PI</text>
+                            <text x="240" y="122" text-anchor="middle" font-size="9" font-weight="600" fill="#1A202D" font-family="JetBrains Mono">${d.suctionPressure}</text>
+                            <text x="240" y="95" text-anchor="middle" font-size="8" fill="#7A9EAB" font-family="JetBrains Mono">${d.suctionPressure} bar</text>
+
+                            <!-- Piping to pump -->
+                            <line x1="256" y1="115" x2="330" y2="115" stroke="url(#cb-pipe-grad)" stroke-width="10" stroke-linecap="round"/>
+                            <line x1="270" y1="115" x2="310" y2="115" stroke="#50B8B8" stroke-width="1" marker-end="url(#cb-flow-arrow)" opacity="0.5"/>
+
+                            <!-- HP PUMP (main symbol) -->
+                            <circle cx="400" cy="115" r="50" fill="white" stroke="url(#cb-pump-grad)" stroke-width="3"/>
+                            <circle cx="400" cy="115" r="42" fill="rgba(80,184,184,0.04)" stroke="rgba(80,184,184,0.15)" stroke-width="1"/>
+                            <!-- Pump impeller icon -->
+                            <path d="M400,80 Q420,100 400,115 Q380,100 400,80Z" fill="#50B8B8" opacity="0.3"/>
+                            <path d="M400,115 Q420,130 400,150 Q380,130 400,115Z" fill="#3978B8" opacity="0.3"/>
+                            <path d="M365,115 Q385,95 400,115 Q385,135 365,115Z" fill="#50B8B8" opacity="0.2"/>
+                            <path d="M435,115 Q415,95 400,115 Q415,135 435,115Z" fill="#3978B8" opacity="0.2"/>
+                            <!-- Center dot -->
+                            <circle cx="400" cy="115" r="5" fill="${d.state === 'running' ? '#2E7D32' : d.state === 'fault' ? '#EF4444' : '#7A9EAB'}"/>
+                            <!-- Pump labels -->
+                            <text x="400" y="30" text-anchor="middle" font-size="12" font-weight="700" fill="#1A202D">HP PUMP P-101</text>
+                            <text x="400" y="44" text-anchor="middle" font-size="10" fill="#50B8B8" font-family="JetBrains Mono">${d.vfdFreq} Hz / ${d.motorSpeed} rpm</text>
+                            <text x="400" y="190" text-anchor="middle" font-size="10" fill="#7A9EAB" font-family="JetBrains Mono">${d.motorPower} kW | ${d.motorCurrent} A</text>
+
+                            <!-- Motor symbol (below pump) -->
+                            <rect x="380" y="168" width="40" height="18" rx="3" fill="white" stroke="rgba(80,184,184,0.3)" stroke-width="1"/>
+                            <text x="400" y="181" text-anchor="middle" font-size="10" font-weight="600" fill="#3978B8" font-family="JetBrains Mono">M</text>
+
+                            <!-- VFD connection line -->
+                            <line x1="400" y1="165" x2="400" y2="168" stroke="rgba(80,184,184,0.4)" stroke-width="1.5" stroke-dasharray="3,2"/>
+
+                            <!-- Discharge piping -->
+                            <line x1="450" y1="115" x2="540" y2="115" stroke="url(#cb-pipe-grad)" stroke-width="10" stroke-linecap="round"/>
+                            <line x1="470" y1="115" x2="520" y2="115" stroke="#50B8B8" stroke-width="1" marker-end="url(#cb-flow-arrow)" opacity="0.5"/>
+
+                            <!-- Discharge pressure gauge -->
+                            <circle cx="565" cy="115" r="16" fill="white" stroke="rgba(57,120,184,0.3)" stroke-width="1.5"/>
+                            <text x="565" y="112" text-anchor="middle" font-size="8" fill="#7A9EAB" font-family="JetBrains Mono">PI</text>
+                            <text x="565" y="122" text-anchor="middle" font-size="9" font-weight="600" fill="#3978B8" font-family="JetBrains Mono">${d.dischargePressure}</text>
+                            <text x="565" y="95" text-anchor="middle" font-size="8" fill="#3978B8" font-weight="600" font-family="JetBrains Mono">${d.dischargePressure} bar</text>
+
+                            <!-- Piping to discharge valve -->
+                            <line x1="581" y1="115" x2="620" y2="115" stroke="url(#cb-pipe-grad)" stroke-width="10" stroke-linecap="round"/>
+
+                            <!-- Discharge Valve V-101 -->
+                            <rect x="615" y="100" width="30" height="30" rx="4" fill="white" stroke="rgba(80,184,184,0.3)" stroke-width="1.5"/>
+                            <path d="M623,115 L637,107 L637,123 Z" fill="${d.dischargeValve > 50 ? '#73CF79' : '#F59E0B'}" opacity="0.7"/>
+                            <text x="630" y="96" text-anchor="middle" font-size="9" fill="#7A9EAB" font-family="JetBrains Mono">V-101</text>
+                            <text x="630" y="142" text-anchor="middle" font-size="9" fill="#2E7D32" font-family="JetBrains Mono">${d.dischargeValve}%</text>
+
+                            <!-- To RO -->
+                            <line x1="645" y1="115" x2="740" y2="115" stroke="url(#cb-pipe-grad)" stroke-width="10" stroke-linecap="round"/>
+                            <line x1="660" y1="115" x2="720" y2="115" stroke="#50B8B8" stroke-width="1" marker-end="url(#cb-flow-arrow)" opacity="0.5"/>
+                            <text x="760" y="118" font-size="10" fill="#7A9EAB" font-family="JetBrains Mono">→ RO</text>
+
+                            <!-- Flow meter -->
+                            <rect x="490" y="70" width="50" height="24" rx="4" fill="white" stroke="rgba(80,184,184,0.2)" stroke-width="1"/>
+                            <text x="515" y="80" text-anchor="middle" font-size="8" fill="#7A9EAB" font-family="JetBrains Mono">FIT-101</text>
+                            <text x="515" y="90" text-anchor="middle" font-size="9" font-weight="600" fill="#1A202D" font-family="JetBrains Mono">${d.feedFlow} m³/h</text>
+                            <line x1="515" y1="94" x2="515" y2="108" stroke="rgba(80,184,184,0.3)" stroke-width="1" stroke-dasharray="3,2"/>
+                        </svg>
+                    </div>
+
+                    <!-- Speed Control + PID -->
+                    <div class="cb-controls-grid">
+                        <!-- Speed Setpoint Card -->
+                        <div class="cb-setpoint-card">
+                            <div class="cb-section-title">VFD 속도 설정</div>
+                            <div class="cb-gauge-row">
+                                <div class="cb-mini-gauge">
+                                    <svg viewBox="0 0 56 56">
+                                        <circle class="track" cx="28" cy="28" r="23"/>
+                                        <circle class="fill" cx="28" cy="28" r="23"
+                                            stroke="${d.state === 'running' ? '#50B8B8' : '#D0DADE'}"
+                                            stroke-dasharray="${2 * Math.PI * 23}"
+                                            stroke-dashoffset="${2 * Math.PI * 23 * (1 - d.vfdFreq / 60)}"/>
+                                    </svg>
+                                </div>
+                                <div class="cb-gauge-info">
+                                    <div class="cb-gauge-main">${d.vfdFreq}<span style="font-size:12px;color:#7A9EAB;margin-left:3px">Hz</span></div>
+                                    <div class="cb-gauge-sub">${d.motorSpeed} rpm</div>
+                                </div>
+                            </div>
+                            <div class="cb-slider-group">
+                                <div class="cb-slider-header">
+                                    <span class="cb-slider-name">주파수 설정</span>
+                                    <span class="cb-slider-val" id="cb-freq-val">${d.vfdFreq}<span class="unit"> Hz</span></span>
+                                </div>
+                                <input type="range" class="cb-slider" id="cb-freq-slider" min="0" max="60" value="${d.vfdFreq}" step="0.1">
+                                <div class="cb-slider-range"><span>0</span><span>60 Hz</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Discharge Valve Control -->
+                        <div class="cb-setpoint-card">
+                            <div class="cb-section-title">토출 밸브 제어 (V-101)</div>
+                            <div class="cb-toggle-row">
+                                <span class="cb-toggle-label">모드: <span style="color:#50B8B8">자동</span></span>
+                                <button class="cb-toggle on"></button>
+                            </div>
+                            <div class="cb-valve-visual">
+                                <div class="cb-valve-pipe"><div class="flow" style="width:${d.dischargeValve}%"></div></div>
+                                <div class="cb-valve-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="#50B8B8" stroke-width="2">
+                                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/>
+                                    </svg>
+                                </div>
+                                <div class="cb-valve-pipe"><div class="flow" style="width:${d.dischargeValve}%"></div></div>
+                            </div>
+                            <div class="cb-slider-group">
+                                <div class="cb-slider-header">
+                                    <span class="cb-slider-name">개도</span>
+                                    <span class="cb-slider-val" id="cb-valve-val">${d.dischargeValve}<span class="unit"> %</span></span>
+                                </div>
+                                <input type="range" class="cb-slider" id="cb-valve-slider" min="0" max="100" value="${d.dischargeValve}" step="1">
+                                <div class="cb-slider-range"><span>닫힘</span><span>전개</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PID Controller -->
+                    <div class="cb-pid-card">
+                        <div class="cb-pid-header">
+                            <span class="cb-pid-title">운전 압력 제어 (PIC-101)</span>
+                            <span style="font-size:12px;color:#7A9EAB;font-family:'JetBrains Mono',monospace">PID Loop — AUTO</span>
+                        </div>
+                        <div class="cb-pid-params">
+                            <div class="cb-pid-param">
+                                <div class="cb-pid-param-label">설정값 (SP)</div>
+                                <div class="cb-pid-param-val sp">${d.pidSP} bar</div>
+                            </div>
+                            <div class="cb-pid-param">
+                                <div class="cb-pid-param-label">현재값 (PV)</div>
+                                <div class="cb-pid-param-val pv">${d.pidPV} bar</div>
+                            </div>
+                            <div class="cb-pid-param">
+                                <div class="cb-pid-param-label">편차 (ERR)</div>
+                                <div class="cb-pid-param-val err">${pidErr > 0 ? '+' : ''}${pidErr} bar</div>
+                            </div>
+                            <div class="cb-pid-param">
+                                <div class="cb-pid-param-label">출력 (OUT)</div>
+                                <div class="cb-pid-param-val out">${d.pidOutput}%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trend Chart -->
+                    <div class="cb-trend-card">
+                        <div class="cb-section-title">토출 압력 트렌드 (최근 60초)</div>
+                        <canvas class="cb-trend-canvas" id="cb-trend-canvas"></canvas>
+                    </div>
+                </div>`;
+            }
+
+            /* ── Render Right: Motor/Drive + Interlocks + Alarms ── */
+            function renderRight() {
+                const d = hpPumpData;
+                return `
+                <div class="cb-right-col">
+                    <div class="cb-param-group">
+                        <div class="cb-param-group-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><text x="12" y="16" text-anchor="middle" font-size="12" fill="currentColor" stroke="none">M</text></svg>
+                            모터 / VFD
+                        </div>
+                        <div class="cb-param-row">
+                            <span class="cb-param-name">VFD 주파수</span>
+                            <span class="cb-param-value">${d.vfdFreq}<span class="unit"> Hz</span></span>
+                        </div>
+                        <div class="cb-param-row">
+                            <span class="cb-param-name">회전수</span>
+                            <span class="cb-param-value">${d.motorSpeed}<span class="unit"> rpm</span></span>
+                        </div>
+                        <div class="cb-param-row">
+                            <span class="cb-param-name">전류</span>
+                            <span class="cb-param-value">${d.motorCurrent}<span class="unit"> A</span></span>
+                        </div>
+                        <div class="cb-param-row">
+                            <span class="cb-param-name">전력</span>
+                            <span class="cb-param-value">${d.motorPower}<span class="unit"> kW</span></span>
+                        </div>
+                        <div class="cb-param-row">
+                            <span class="cb-param-name">권선 온도</span>
+                            <span class="cb-param-value">${d.windingTemp}<span class="unit"> °C</span></span>
+                        </div>
+                    </div>
+
+                    <div class="cb-param-group">
+                        <div class="cb-param-group-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h2M20 12h2M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                            진동 / 베어링
+                        </div>
+                        <div class="cb-param-row">
+                            <span class="cb-param-name">진동 DE</span>
+                            <span class="cb-param-value${d.vibrationDE > 4.5 ? ' warn' : ''}">${d.vibrationDE}<span class="unit"> mm/s</span></span>
+                        </div>
+                        <div class="cb-param-row">
+                            <span class="cb-param-name">진동 NDE</span>
+                            <span class="cb-param-value${d.vibrationNDE > 4.5 ? ' warn' : ''}">${d.vibrationNDE}<span class="unit"> mm/s</span></span>
+                        </div>
+                        <div class="cb-param-row">
+                            <span class="cb-param-name">베어링 DE</span>
+                            <span class="cb-param-value${d.bearingTempDE > 75 ? ' warn' : ''}">${d.bearingTempDE}<span class="unit"> °C</span></span>
+                        </div>
+                        <div class="cb-param-row">
+                            <span class="cb-param-name">베어링 NDE</span>
+                            <span class="cb-param-value">${d.bearingTempNDE}<span class="unit"> °C</span></span>
+                        </div>
+                    </div>
+
+                    <div class="cb-param-group">
+                        <div class="cb-param-group-title collapsible collapsed" data-cb-toggle="interlock">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            인터록 (${interlocks.filter(i => i.status === 'safe').length}/${interlocks.length} 정상)
+                            <svg class="cb-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                        <div class="cb-collapse-body collapsed" data-cb-body="interlock">
+                            <div class="cb-interlock-grid">
+                                ${interlocks.map(il => `
+                                    <div class="cb-interlock-item">
+                                        <div class="cb-interlock-dot ${il.status}"></div>
+                                        ${il.name}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="cb-param-group">
+                        <div class="cb-param-group-title collapsible" data-cb-toggle="alarm">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.5"/></svg>
+                            활성 경보 (${alarms.length}건)
+                            <svg class="cb-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                        <div class="cb-collapse-body" data-cb-body="alarm">
+                            <div class="cb-alarm-list">
+                                ${alarms.map(a => `
+                                    <div class="cb-alarm-item ${a.level}">
+                                        <span class="cb-alarm-time">${a.time}</span>
+                                        <span>${a.level === 'danger' ? '🔴' : '🟡'} ${a.msg}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            /* ── Draw Trend Chart ── */
+            function drawTrend() {
+                const canvas = document.getElementById('cb-trend-canvas');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                const W = canvas.offsetWidth;
+                const H = canvas.offsetHeight;
+                canvas.width = W * 2; canvas.height = H * 2;
+                ctx.scale(2, 2);
+
+                const data = trendHistory.pressure;
+                const min = 58, max = 68;
+                const step = W / (data.length - 1);
+
+                // Background
+                ctx.fillStyle = '#F4F7F9';
+                ctx.fillRect(0, 0, W, H);
+
+                // Grid lines
+                ctx.strokeStyle = 'rgba(80,184,184,0.08)';
+                ctx.lineWidth = 0.5;
+                for (let v = min; v <= max; v += 2) {
+                    const y = H - ((v - min) / (max - min)) * (H - 20) - 10;
+                    ctx.beginPath(); ctx.moveTo(40, y); ctx.lineTo(W, y); ctx.stroke();
+                    ctx.fillStyle = '#A8C4CE'; ctx.font = '9px JetBrains Mono';
+                    ctx.textAlign = 'right';
+                    ctx.fillText(v + '', 36, y + 3);
+                }
+
+                // SP line (62.0 bar)
+                const spY = H - ((62.0 - min) / (max - min)) * (H - 20) - 10;
+                ctx.strokeStyle = 'rgba(57,120,184,0.4)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath(); ctx.moveTo(40, spY); ctx.lineTo(W, spY); ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.fillStyle = '#3978B8'; ctx.font = '9px JetBrains Mono'; ctx.textAlign = 'left';
+                ctx.fillText('SP 62.0', W - 50, spY - 4);
+
+                // Data line
+                ctx.strokeStyle = '#50B8B8';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                data.forEach((v, i) => {
+                    const x = 40 + i * ((W - 40) / (data.length - 1));
+                    const y = H - ((v - min) / (max - min)) * (H - 20) - 10;
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                });
+                ctx.stroke();
+
+                // Fill area under line
+                const lastX = 40 + (data.length - 1) * ((W - 40) / (data.length - 1));
+                ctx.lineTo(lastX, H);
+                ctx.lineTo(40, H);
+                ctx.closePath();
+                ctx.fillStyle = 'rgba(80,184,184,0.06)';
+                ctx.fill();
+
+                // Latest value dot
+                const lastV = data[data.length - 1];
+                const lastY = H - ((lastV - min) / (max - min)) * (H - 20) - 10;
+                ctx.beginPath();
+                ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
+                ctx.fillStyle = '#50B8B8'; ctx.fill();
+                ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
+            }
+
+            /* ── Update trend with simulated data ── */
+            function updateTrend() {
+                const last = trendHistory.pressure[trendHistory.pressure.length - 1];
+                const next = 62.0 + Math.sin(Date.now() / 2000) * 0.8 + (Math.random() - 0.5) * 0.3;
+                trendHistory.pressure.push(next);
+                if (trendHistory.pressure.length > 60) trendHistory.pressure.shift();
+                hpPumpData.dischargePressure = +next.toFixed(1);
+                hpPumpData.pidPV = +next.toFixed(1);
+                hpPumpData.diffPressure = +(next - hpPumpData.suctionPressure).toFixed(1);
+                drawTrend();
+            }
+
+            /* ── Master Render ── */
+            function renderAll() {
+                renderStatusBanner();
+                const hmiEl = document.getElementById('cb-hmi-main');
+                hmiEl.innerHTML = renderLeftParams() + renderCenter() + renderRight();
+                drawTrend();
+                attachSliderHandlers();
+            }
+
+            function attachSliderHandlers() {
+                const freqSlider = document.getElementById('cb-freq-slider');
+                const freqVal = document.getElementById('cb-freq-val');
+                if (freqSlider) {
+                    freqSlider.addEventListener('input', e => {
+                        freqVal.innerHTML = e.target.value + '<span class="unit"> Hz</span>';
+                    });
+                }
+                const valveSlider = document.getElementById('cb-valve-slider');
+                const valveVal = document.getElementById('cb-valve-val');
+                if (valveSlider) {
+                    valveSlider.addEventListener('input', e => {
+                        valveVal.innerHTML = e.target.value + '<span class="unit"> %</span>';
+                    });
+                }
+                // Toggle handlers
+                document.querySelectorAll('#control-board .cb-toggle').forEach(btn => {
+                    btn.addEventListener('click', () => btn.classList.toggle('on'));
+                });
+                // Collapsible panel handlers
+                document.querySelectorAll('#control-board .cb-param-group-title.collapsible').forEach(title => {
+                    title.addEventListener('click', () => {
+                        const key = title.dataset.cbToggle;
+                        const body = document.querySelector(`[data-cb-body="${key}"]`);
+                        if (!body) return;
+                        title.classList.toggle('collapsed');
+                        body.classList.toggle('collapsed');
+                    });
+                });
+            }
+
+            /* ── Elements to hide when control board is active ── */
+            const cbHideTargets = [
+                '#layer-panel',
+                '#detail-panel',
+                '.kpi-strip',
+                '#wf-badge',
+                '#wf-badge-error',
+                '#hint-row',
+                '#esc-hint'
+            ];
+
+            function hidePanelsForCB() {
+                cbHideTargets.forEach(sel => {
+                    const el = document.querySelector(sel);
+                    if (el) {
+                        el.dataset.cbWasDisplay = el.style.display || '';
+                        el.style.display = 'none';
+                    }
+                });
+            }
+
+            function restorePanelsFromCB() {
+                cbHideTargets.forEach(sel => {
+                    const el = document.querySelector(sel);
+                    if (el) {
+                        el.style.display = el.dataset.cbWasDisplay || '';
+                        delete el.dataset.cbWasDisplay;
+                    }
+                });
+            }
+
+            /* ── Show / Hide ── */
+            window.showControlBoard = function (eqData) {
+                if (eqData) {
+                    document.getElementById('cb-eq-name').textContent = eqData.name || '설비';
+                    document.getElementById('cb-eq-id').textContent = eqData.id || '';
+                }
+
+                hidePanelsForCB();
+                renderAll();
+                cbEl.classList.add('active');
+
+                // Start timestamp updater
+                if (cbTimerInterval) clearInterval(cbTimerInterval);
+                cbTimerInterval = setInterval(() => {
+                    const now = new Date();
+                    const ts = now.getFullYear() + '-' +
+                        String(now.getMonth() + 1).padStart(2, '0') + '-' +
+                        String(now.getDate()).padStart(2, '0') + ' ' +
+                        String(now.getHours()).padStart(2, '0') + ':' +
+                        String(now.getMinutes()).padStart(2, '0') + ':' +
+                        String(now.getSeconds()).padStart(2, '0') + ' KST';
+                    document.getElementById('cb-timestamp').textContent = ts;
+                }, 1000);
+
+                // Start trend updater
+                if (cbTrendInterval) clearInterval(cbTrendInterval);
+                cbTrendInterval = setInterval(updateTrend, 1000);
+            };
+
+            window.hideControlBoard = function () {
+                cbEl.classList.remove('active');
+                restorePanelsFromCB();
+                if (cbTimerInterval) { clearInterval(cbTimerInterval); cbTimerInterval = null; }
+                if (cbTrendInterval) { clearInterval(cbTrendInterval); cbTrendInterval = null; }
+
+                // Reset camera to global view (fix zoom stuck bug)
+                if (typeof window.resetCameraToGlobal === 'function') {
+                    window.resetCameraToGlobal();
+                }
+            };
+
+            /* ESC to close */
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape' && cbEl.classList.contains('active')) {
+                    hideControlBoard();
+                    e.stopPropagation();
+                }
+            });
+
+        })();
+    </script>
+</body>
+
+</html>

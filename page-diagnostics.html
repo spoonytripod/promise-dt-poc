@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920">
+    <title>진단·고장예지 — PROMISE DT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+        html{width:100vw;height:100vh;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center;}
+        body{width:1920px;height:1080px;flex-shrink:0;overflow:hidden;background:#EBF3F5;font-family:'Plus Jakarta Sans',sans-serif;color:#1A202D;-webkit-font-smoothing:antialiased;transform-origin:center center;position:relative;}
+
+        .page-shell{position:fixed;top:84px;left:0;right:0;bottom:0;display:flex;overflow:hidden;}
+        .lnb{width:230px;background:rgba(255,255,255,0.92);backdrop-filter:blur(14px);border-right:1px solid rgba(80,184,184,0.16);padding:20px 0;overflow-y:auto;flex-shrink:0;}
+        .lnb-title{font-size:9.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:#A8C4CE;padding:6px 22px 8px;}
+        .lnb-item{display:flex;align-items:center;gap:10px;padding:10px 22px;font-size:13.5px;color:#3D5A6A;cursor:pointer;transition:all 0.12s;position:relative;}
+        .lnb-item:hover{background:rgba(80,184,184,0.06);color:#50B8B8;}
+        .lnb-item.active{background:rgba(80,184,184,0.08);color:#50B8B8;font-weight:600;}
+        .lnb-item.active::before{content:'';position:absolute;left:0;top:6px;bottom:6px;width:3px;border-radius:0 3px 3px 0;background:linear-gradient(180deg,#73CF79,#3978B8);}
+        .lnb-item svg{flex-shrink:0;}
+        .lnb-divider{height:1px;background:rgba(80,184,184,0.1);margin:8px 18px;}
+
+        .main-content{flex:1;overflow-y:auto;padding:24px 32px 40px;}
+        .page-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;}
+        .page-hdr h1{font-size:22px;font-weight:800;background:linear-gradient(90deg,#73CF79,#50B8B8,#3978B8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+        .page-hdr-sub{font-size:13px;color:#7A9EAB;margin-top:2px;}
+        .live-pulse{width:7px;height:7px;border-radius:50%;background:#73CF79;display:inline-block;vertical-align:middle;animation:lp 2s infinite;}
+        @keyframes lp{0%,100%{box-shadow:0 0 0 0 rgba(115,207,121,0.5)}50%{box-shadow:0 0 0 5px rgba(115,207,121,0)}}
+
+        .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid rgba(80,184,184,0.2);background:white;color:#3D5A6A;transition:all 0.15s;}
+        .btn:hover{border-color:#50B8B8;color:#50B8B8;}
+        .btn-primary{background:linear-gradient(135deg,#50B8B8,#3978B8);color:white;border-color:transparent;}
+
+        .card{background:white;border-radius:14px;border:1px solid rgba(80,184,184,0.1);overflow:hidden;transition:box-shadow 0.2s;}
+        .card:hover{box-shadow:0 4px 20px rgba(0,0,0,0.06);}
+        .card-hdr{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid rgba(0,0,0,0.04);}
+        .card-title{font-size:13.5px;font-weight:700;}
+        .card-sub{font-size:11px;color:#7A9EAB;margin-top:1px;}
+        .card-body{padding:18px 20px;}
+
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;}
+        .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:18px;}
+        .section-tag{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;color:#7A9EAB;margin-bottom:10px;letter-spacing:0.3px;}
+
+        /* KPI */
+        .kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+        .kpi-card{background:white;border-radius:14px;padding:18px 20px;border:1px solid rgba(80,184,184,0.1);transition:all 0.2s;position:relative;overflow:hidden;}
+        .kpi-card:hover{box-shadow:0 6px 24px rgba(80,184,184,0.12);transform:translateY(-2px);}
+        .kpi-card.hl::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#73CF79,#50B8B8,#3978B8);}
+        .kpi-label{font-size:11.5px;font-weight:600;color:#7A9EAB;margin-bottom:8px;}
+        .kpi-val{font-size:30px;font-weight:800;color:#1A202D;font-variant-numeric:tabular-nums;line-height:1;}
+        .kpi-unit{font-size:13px;font-weight:500;color:#7A9EAB;margin-left:3px;}
+        .kpi-meta{display:flex;justify-content:space-between;margin-top:10px;font-size:11px;color:#A8C4CE;}
+
+        /* Equipment health list */
+        .eq-health{display:flex;flex-direction:column;gap:8px;}
+        .eq-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;border:1px solid rgba(80,184,184,0.08);background:rgba(80,184,184,0.02);transition:all 0.12s;cursor:pointer;}
+        .eq-row:hover{background:rgba(80,184,184,0.06);border-color:rgba(80,184,184,0.2);}
+        .eq-status{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+        .eq-status.ok{background:#73CF79;box-shadow:0 0 0 3px rgba(115,207,121,0.2);}
+        .eq-status.warn{background:#F59E0B;box-shadow:0 0 0 3px rgba(245,158,11,0.2);}
+        .eq-status.crit{background:#EF4444;box-shadow:0 0 0 3px rgba(239,68,68,0.2);animation:blink 1.4s ease infinite;}
+        @keyframes blink{0%,100%{opacity:1}50%{opacity:0.5}}
+        .eq-info{flex:1;}
+        .eq-name{font-size:13px;font-weight:700;color:#1A202D;}
+        .eq-desc{font-size:11px;color:#7A9EAB;margin-top:1px;}
+        .eq-health-bar{width:120px;height:6px;border-radius:4px;background:rgba(80,184,184,0.08);overflow:hidden;}
+        .eq-health-fill{height:100%;border-radius:4px;}
+        .eq-health-pct{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;min-width:38px;text-align:right;}
+
+        /* Timeline */
+        .timeline{position:relative;padding-left:24px;}
+        .timeline::before{content:'';position:absolute;left:8px;top:4px;bottom:4px;width:2px;background:rgba(80,184,184,0.15);border-radius:2px;}
+        .tl-item{position:relative;padding:10px 0 10px 16px;border-bottom:1px solid rgba(0,0,0,0.03);}
+        .tl-item:last-child{border-bottom:none;}
+        .tl-item::before{content:'';position:absolute;left:-20px;top:14px;width:10px;height:10px;border-radius:50%;border:2px solid #50B8B8;background:white;}
+        .tl-item.warn::before{border-color:#F59E0B;background:#FEF3C7;}
+        .tl-item.crit::before{border-color:#EF4444;background:#FEE2E2;}
+        .tl-item.ok::before{border-color:#73CF79;background:#DCFCE7;}
+        .tl-time{font-size:10px;color:#A8C4CE;font-family:'JetBrains Mono',monospace;}
+        .tl-title{font-size:12.5px;font-weight:600;color:#1A202D;margin-top:2px;}
+        .tl-desc{font-size:11.5px;color:#7A9EAB;margin-top:2px;line-height:1.4;}
+
+        /* RUL bars */
+        .rul-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.04);}
+        .rul-item:last-child{border-bottom:none;}
+        .rul-name{font-size:13px;font-weight:600;color:#3D5A6A;min-width:140px;}
+        .rul-bar{flex:1;height:8px;border-radius:4px;background:rgba(80,184,184,0.08);overflow:hidden;}
+        .rul-fill{height:100%;border-radius:4px;transition:width 1s ease;}
+        .rul-val{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;min-width:60px;text-align:right;}
+
+        .main-content::-webkit-scrollbar{width:6px;}
+        .main-content::-webkit-scrollbar-thumb{background:rgba(80,184,184,0.2);border-radius:3px;}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        .fade-up{animation:fadeUp 0.5s ease forwards;opacity:0;}
+        .fade-up:nth-child(1){animation-delay:0.05s}.fade-up:nth-child(2){animation-delay:0.1s}.fade-up:nth-child(3){animation-delay:0.15s}.fade-up:nth-child(4){animation-delay:0.2s}
+    </style>
+</head>
+<body>
+    <script src="shared-navbar.js"></script>
+
+    <div class="page-shell">
+        <nav class="lnb">
+            <div class="lnb-title">진단·고장예지</div>
+            <div class="lnb-item active">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                설비 건전성
+            </div>
+            <div class="lnb-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                잔여수명 예측 (RUL)
+            </div>
+            <div class="lnb-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                진동·온도 분석
+            </div>
+            <div class="lnb-divider"></div>
+            <div class="lnb-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                알람 이력
+            </div>
+        </nav>
+
+        <div class="main-content">
+            <div class="page-hdr fade-up">
+                <div>
+                    <h1>진단·고장예지</h1>
+                    <div class="page-hdr-sub">설비 건전성 모니터링 · 잔여수명 예측(RUL) · 이상 감지 &nbsp;<span class="live-pulse"></span></div>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        보고서 내보내기
+                    </button>
+                    <button class="btn btn-primary">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.31"/></svg>
+                        진단 갱신
+                    </button>
+                </div>
+            </div>
+
+            <!-- KPI -->
+            <div class="kpi-strip fade-up">
+                <div class="kpi-card hl">
+                    <div class="kpi-label">플랜트 종합 건전성</div>
+                    <div><span class="kpi-val" style="background:linear-gradient(90deg,#73CF79,#50B8B8,#3978B8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">92.4</span><span class="kpi-unit">점</span></div>
+                    <div class="kpi-meta"><span>전일: 91.8점</span><span style="font-weight:700;color:#2E7D32;">▲ +0.6</span></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">정상 설비</div>
+                    <div><span class="kpi-val" style="color:#73CF79;">8</span><span class="kpi-unit">/ 10</span></div>
+                    <div class="kpi-meta"><span>80% 정상</span></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">주의 설비</div>
+                    <div><span class="kpi-val" style="color:#F59E0B;">1</span><span class="kpi-unit">건</span></div>
+                    <div class="kpi-meta"><span>RO 멤브레인</span></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">위험 설비</div>
+                    <div><span class="kpi-val" style="color:#EF4444;">1</span><span class="kpi-unit">건</span></div>
+                    <div class="kpi-meta"><span>고압펌프 베어링</span></div>
+                </div>
+            </div>
+
+            <!-- Equipment health + Timeline -->
+            <div class="grid-2 fade-up">
+                <div class="card">
+                    <div class="card-hdr">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#50B8B8" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        <div><div class="card-title">설비 건전성 현황</div><div class="card-sub">10개 주요 설비 실시간 상태</div></div>
+                    </div>
+                    <div class="card-body" style="padding:12px 16px;">
+                        <div class="eq-health">
+                            <div class="eq-row">
+                                <div class="eq-status ok"></div>
+                                <div class="eq-info"><div class="eq-name">취수펌프 (P-101)</div><div class="eq-desc">정상 운전 · 진동 0.8mm/s</div></div>
+                                <div class="eq-health-bar"><div class="eq-health-fill" style="width:96%;background:linear-gradient(90deg,#73CF79,#50B8B8);"></div></div>
+                                <div class="eq-health-pct" style="color:#2E7D32;">96%</div>
+                            </div>
+                            <div class="eq-row">
+                                <div class="eq-status crit"></div>
+                                <div class="eq-info"><div class="eq-name">고압펌프 베어링 (P-202)</div><div class="eq-desc" style="color:#EF4444;">진동 이상 감지 · 4.2mm/s (임계: 3.5)</div></div>
+                                <div class="eq-health-bar"><div class="eq-health-fill" style="width:42%;background:#EF4444;"></div></div>
+                                <div class="eq-health-pct" style="color:#EF4444;">42%</div>
+                            </div>
+                            <div class="eq-row">
+                                <div class="eq-status warn"></div>
+                                <div class="eq-info"><div class="eq-name">RO 멤브레인 (RO-301)</div><div class="eq-desc" style="color:#D97706;">차압 상승 · 세정 D-3 권장</div></div>
+                                <div class="eq-health-bar"><div class="eq-health-fill" style="width:68%;background:#F59E0B;"></div></div>
+                                <div class="eq-health-pct" style="color:#D97706;">68%</div>
+                            </div>
+                            <div class="eq-row">
+                                <div class="eq-status ok"></div>
+                                <div class="eq-info"><div class="eq-name">전처리 DMF (F-101)</div><div class="eq-desc">정상 · 차압 0.4bar</div></div>
+                                <div class="eq-health-bar"><div class="eq-health-fill" style="width:91%;background:#73CF79;"></div></div>
+                                <div class="eq-health-pct" style="color:#2E7D32;">91%</div>
+                            </div>
+                            <div class="eq-row">
+                                <div class="eq-status ok"></div>
+                                <div class="eq-info"><div class="eq-name">에너지 회수장치 (ERD-01)</div><div class="eq-desc">정상 · 효율 94%</div></div>
+                                <div class="eq-health-bar"><div class="eq-health-fill" style="width:94%;background:linear-gradient(90deg,#73CF79,#50B8B8);"></div></div>
+                                <div class="eq-health-pct" style="color:#2E7D32;">94%</div>
+                            </div>
+                            <div class="eq-row">
+                                <div class="eq-status ok"></div>
+                                <div class="eq-info"><div class="eq-name">약품주입 펌프 (CP-01)</div><div class="eq-desc">정상 · 유량 안정</div></div>
+                                <div class="eq-health-bar"><div class="eq-health-fill" style="width:98%;background:#73CF79;"></div></div>
+                                <div class="eq-health-pct" style="color:#2E7D32;">98%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline -->
+                <div class="card">
+                    <div class="card-hdr">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#50B8B8" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                        <div><div class="card-title">이상 감지 타임라인</div><div class="card-sub">최근 24시간 이벤트</div></div>
+                    </div>
+                    <div class="card-body" style="padding:14px 20px;">
+                        <div class="timeline">
+                            <div class="tl-item crit">
+                                <div class="tl-time">10:15:32</div>
+                                <div class="tl-title">P-202 베어링 진동 임계 초과</div>
+                                <div class="tl-desc">진동 4.2mm/s (임계 3.5mm/s). RUL 추정: 15일. 정비 계획 수립 필요.</div>
+                            </div>
+                            <div class="tl-item warn">
+                                <div class="tl-time">09:42:18</div>
+                                <div class="tl-title">RO-301 차압 상승 경고</div>
+                                <div class="tl-desc">차압 0.3bar 상승 감지. 멤브레인 세정 D-3 권장.</div>
+                            </div>
+                            <div class="tl-item ok">
+                                <div class="tl-time">08:30:00</div>
+                                <div class="tl-title">일일 진단 완료</div>
+                                <div class="tl-desc">10개 설비 정기 진단 수행. 종합 건전성 92.4점.</div>
+                            </div>
+                            <div class="tl-item ok">
+                                <div class="tl-time">07:15:45</div>
+                                <div class="tl-title">ERD-01 효율 점검 완료</div>
+                                <div class="tl-desc">에너지 회수율 94.2%. 정상 범위 내.</div>
+                            </div>
+                            <div class="tl-item warn">
+                                <div class="tl-time">03:22:11</div>
+                                <div class="tl-title">P-202 진동 주의 단계 진입</div>
+                                <div class="tl-desc">진동 3.1mm/s → 3.6mm/s 상승 추세.</div>
+                            </div>
+                            <div class="tl-item ok">
+                                <div class="tl-time">00:00:00</div>
+                                <div class="tl-title">야간 자동 진단 시작</div>
+                                <div class="tl-desc">스케줄 기반 진동/온도/압력 종합 진단 실행.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RUL Prediction -->
+            <div class="section-tag fade-up">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                잔여수명 예측 (RUL)
+            </div>
+            <div class="card fade-up">
+                <div class="card-body" style="padding:16px 20px;">
+                    <div class="rul-item">
+                        <span class="rul-name">고압펌프 베어링</span>
+                        <div class="rul-bar"><div class="rul-fill" style="width:15%;background:#EF4444;"></div></div>
+                        <span class="rul-val" style="color:#EF4444;">~15일</span>
+                    </div>
+                    <div class="rul-item">
+                        <span class="rul-name">RO 멤브레인</span>
+                        <div class="rul-bar"><div class="rul-fill" style="width:45%;background:#F59E0B;"></div></div>
+                        <span class="rul-val" style="color:#D97706;">~120일</span>
+                    </div>
+                    <div class="rul-item">
+                        <span class="rul-name">취수펌프 임펠러</span>
+                        <div class="rul-bar"><div class="rul-fill" style="width:72%;background:linear-gradient(90deg,#50B8B8,#73CF79);"></div></div>
+                        <span class="rul-val" style="color:#2E7D32;">~280일</span>
+                    </div>
+                    <div class="rul-item">
+                        <span class="rul-name">DMF 여재</span>
+                        <div class="rul-bar"><div class="rul-fill" style="width:60%;background:#50B8B8;"></div></div>
+                        <span class="rul-val" style="color:#3978B8;">~200일</span>
+                    </div>
+                    <div class="rul-item">
+                        <span class="rul-name">ERD 로터</span>
+                        <div class="rul-bar"><div class="rul-fill" style="width:85%;background:#73CF79;"></div></div>
+                        <span class="rul-val" style="color:#2E7D32;">~350일</span>
+                    </div>
+                    <div class="rul-item">
+                        <span class="rul-name">약품 주입 펌프</span>
+                        <div class="rul-bar"><div class="rul-fill" style="width:90%;background:#73CF79;"></div></div>
+                        <span class="rul-val" style="color:#2E7D32;">~400일</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.lnb-item').forEach(item=>{
+            item.addEventListener('click',()=>{
+                document.querySelectorAll('.lnb-item').forEach(x=>x.classList.remove('active'));
+                item.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920">
+    <title>운영 정보 › 에너지 — PROMISE DT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+        html{width:100vw;height:100vh;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center;}
+        body{width:1920px;height:1080px;flex-shrink:0;overflow:hidden;background:#EBF3F5;font-family:'Plus Jakarta Sans',sans-serif;color:#1A202D;-webkit-font-smoothing:antialiased;transform-origin:center center;position:relative;}
+
+        /* ── PAGE LAYOUT ── */
+        .page-shell{position:fixed;top:84px;left:0;right:0;bottom:0;display:flex;overflow:hidden;}
+
+        /* ── LEFT NAV ── */
+        .lnb{width:230px;background:rgba(255,255,255,0.92);backdrop-filter:blur(14px);border-right:1px solid rgba(80,184,184,0.16);padding:20px 0;overflow-y:auto;flex-shrink:0;}
+        .lnb-title{font-size:9.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:#A8C4CE;padding:6px 22px 8px;}
+        .lnb-item{display:flex;align-items:center;gap:10px;padding:10px 22px;font-size:13.5px;color:#3D5A6A;cursor:pointer;transition:all 0.12s;position:relative;}
+        .lnb-item:hover{background:rgba(80,184,184,0.06);color:#50B8B8;}
+        .lnb-item.active{background:rgba(80,184,184,0.08);color:#50B8B8;font-weight:600;}
+        .lnb-item.active::before{content:'';position:absolute;left:0;top:6px;bottom:6px;width:3px;border-radius:0 3px 3px 0;background:linear-gradient(180deg,#73CF79,#3978B8);}
+        .lnb-item svg{flex-shrink:0;}
+        .lnb-sub{padding:2px 0 6px 46px;}
+        .lnb-sub-item{font-size:12.5px;color:#7A9EAB;padding:5px 12px;border-radius:6px;cursor:pointer;transition:all 0.1s;}
+        .lnb-sub-item:hover{color:#50B8B8;background:rgba(80,184,184,0.05);}
+        .lnb-sub-item.active{color:#3978B8;font-weight:600;background:rgba(57,120,184,0.06);}
+        .lnb-divider{height:1px;background:rgba(80,184,184,0.1);margin:8px 18px;}
+
+        /* ── MAIN CONTENT ── */
+        .main-content{flex:1;overflow-y:auto;padding:24px 32px 40px;background:#EBF3F5;}
+
+        /* Page Header */
+        .page-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;}
+        .page-hdr h1{font-size:22px;font-weight:800;letter-spacing:-0.02em;background:linear-gradient(90deg,#73CF79,#50B8B8,#3978B8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+        .page-hdr-sub{font-size:13px;color:#7A9EAB;margin-top:2px;}
+        .page-hdr-actions{display:flex;gap:8px;align-items:center;}
+
+        /* Buttons */
+        .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid rgba(80,184,184,0.2);background:white;color:#3D5A6A;transition:all 0.15s;}
+        .btn:hover{border-color:#50B8B8;color:#50B8B8;}
+        .btn-primary{background:linear-gradient(135deg,#50B8B8,#3978B8);color:white;border-color:transparent;}
+        .btn-primary:hover{box-shadow:0 4px 16px rgba(57,120,184,0.3);}
+
+        /* Range Tabs */
+        .range-tabs{display:flex;gap:2px;background:rgba(80,184,184,0.08);border-radius:8px;padding:3px;}
+        .range-tab{padding:5px 14px;border-radius:6px;font-size:12px;font-weight:600;color:#7A9EAB;cursor:pointer;transition:all 0.12s;}
+        .range-tab.active{background:white;color:#3978B8;box-shadow:0 1px 4px rgba(0,0,0,0.08);}
+
+        /* ── KPI STRIP ── */
+        .kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:22px;}
+        .kpi-card{background:white;border-radius:14px;padding:16px 18px;border:1px solid rgba(80,184,184,0.1);transition:all 0.2s;position:relative;overflow:hidden;}
+        .kpi-card:hover{box-shadow:0 6px 24px rgba(80,184,184,0.12);transform:translateY(-2px);}
+        .kpi-card.highlight{border-color:rgba(80,184,184,0.25);}
+        .kpi-card.highlight::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#73CF79,#50B8B8,#3978B8);}
+        .kpi-label{font-size:11.5px;font-weight:600;color:#7A9EAB;display:flex;align-items:center;gap:5px;margin-bottom:8px;}
+        .kpi-val{font-size:28px;font-weight:800;color:#1A202D;font-variant-numeric:tabular-nums;line-height:1;}
+        .kpi-val.grad{background:linear-gradient(90deg,#73CF79,#50B8B8,#3978B8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+        .kpi-unit{font-size:13px;font-weight:500;color:#7A9EAB;margin-left:3px;}
+        .kpi-meta{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:11px;}
+        .kpi-target{color:#A8C4CE;}
+        .kpi-delta{font-weight:700;padding:2px 6px;border-radius:4px;font-size:10.5px;}
+        .kpi-delta.down{color:#2E7D32;background:rgba(115,207,121,0.12);}
+        .kpi-delta.up{color:#DC2626;background:rgba(239,68,68,0.08);}
+        .kpi-delta.flat{color:#3978B8;background:rgba(57,120,184,0.08);}
+        .kpi-bar{height:4px;border-radius:4px;background:rgba(80,184,184,0.08);margin-top:10px;overflow:hidden;}
+        .kpi-bar-fill{height:100%;border-radius:4px;transition:width 1s ease;}
+
+        /* ── CARDS ── */
+        .card{background:white;border-radius:14px;border:1px solid rgba(80,184,184,0.1);overflow:hidden;transition:box-shadow 0.2s;}
+        .card:hover{box-shadow:0 4px 20px rgba(0,0,0,0.06);}
+        .card-hdr{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid rgba(0,0,0,0.04);}
+        .card-hdr svg{flex-shrink:0;color:#50B8B8;}
+        .card-title{font-size:13.5px;font-weight:700;color:#1A202D;}
+        .card-sub{font-size:11px;color:#7A9EAB;margin-top:1px;}
+        .card-body{padding:18px 20px;}
+
+        /* ── GRID LAYOUTS ── */
+        .row-2{display:grid;grid-template-columns:1fr 340px;gap:16px;margin-bottom:18px;}
+        .section-tag{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;color:#7A9EAB;margin-bottom:10px;letter-spacing:0.3px;}
+
+        /* ── Legend ── */
+        .legend{display:flex;gap:14px;flex-wrap:wrap;}
+        .legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#3D5A6A;}
+        .legend-line{width:18px;height:2.5px;border-radius:1px;}
+        .legend-dot{width:8px;height:8px;border-radius:50%;}
+
+        /* ── Donut ── */
+        .donut-wrap{display:flex;flex-direction:column;align-items:center;padding:10px 0;}
+        .donut-labels{width:100%;display:flex;flex-direction:column;gap:6px;margin-top:12px;}
+        .donut-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;background:rgba(80,184,184,0.03);transition:background 0.12s;}
+        .donut-row:hover{background:rgba(80,184,184,0.07);}
+        .donut-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+        .donut-name{flex:1;font-size:12px;color:#3D5A6A;font-weight:500;}
+        .donut-kwh{font-size:10.5px;color:#7A9EAB;}
+        .donut-pct{font-size:12px;font-weight:700;color:#1A202D;}
+
+        /* ── Gauge ── */
+        .gauge-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 12px;border-radius:6px;background:rgba(115,207,121,0.12);color:#2E7D32;border:1px solid rgba(115,207,121,0.3);margin-top:8px;}
+
+        /* ── Stats Section ── */
+        .stat-tabs{display:flex;gap:0;border-bottom:1px solid rgba(80,184,184,0.1);}
+        .stat-tab{padding:11px 18px;font-size:12.5px;font-weight:600;color:#7A9EAB;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.12s;}
+        .stat-tab.active{color:#3978B8;border-bottom-color:#3978B8;}
+        .stat-tab:not(.active):hover{color:#3D5A6A;}
+        .stat-layout{display:grid;grid-template-columns:1fr 380px;}
+        .stat-chart-area{padding:18px 20px;border-right:1px solid rgba(80,184,184,0.08);}
+        .stat-table-area{padding:18px 20px;}
+        .stat-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;}
+        .stat-sum-card{background:rgba(80,184,184,0.04);border-radius:10px;padding:10px 12px;border:1px solid rgba(80,184,184,0.08);}
+        .stat-sum-label{font-size:10.5px;color:#7A9EAB;margin-bottom:4px;font-weight:600;}
+        .stat-sum-val{font-size:18px;font-weight:800;color:#1A202D;font-variant-numeric:tabular-nums;}
+        .stat-sum-unit{font-size:11px;color:#7A9EAB;margin-left:3px;}
+
+        /* ── Data Table ── */
+        .data-table{width:100%;border-collapse:collapse;}
+        .data-table th{font-size:10.5px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:#7A9EAB;padding:7px 10px;text-align:left;border-bottom:2px solid rgba(80,184,184,0.12);background:rgba(80,184,184,0.03);}
+        .data-table td{padding:8px 10px;border-bottom:1px solid rgba(80,184,184,0.06);font-size:12.5px;color:#3D5A6A;}
+        .data-table tr:last-child td{border-bottom:none;}
+        .data-table tr:hover td{background:rgba(80,184,184,0.04);}
+        .td-num{font-variant-numeric:tabular-nums;font-weight:600;color:#1A202D;text-align:right;}
+        .td-good{color:#2E7D32;font-weight:700;}
+        .td-warn{color:#B45309;font-weight:700;}
+
+        /* ── Date Picker ── */
+        .date-input{display:flex;align-items:center;gap:6px;background:white;border:1px solid rgba(80,184,184,0.2);border-radius:6px;padding:5px 10px;font-size:12px;color:#3D5A6A;cursor:pointer;}
+        .date-input:hover{border-color:#50B8B8;}
+
+        /* ── SVG Chart ── */
+        svg text{font-family:inherit;}
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar{width:6px;height:6px;}
+        ::-webkit-scrollbar-track{background:transparent;}
+        ::-webkit-scrollbar-thumb{background:rgba(80,184,184,0.2);border-radius:3px;}
+
+        /* ── Animations ── */
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+        .fade-up{animation:fadeUp .45s ease both;}
+        .fade-up:nth-child(1){animation-delay:.05s;}
+        .fade-up:nth-child(2){animation-delay:.10s;}
+        .fade-up:nth-child(3){animation-delay:.15s;}
+        .fade-up:nth-child(4){animation-delay:.20s;}
+        .fade-up:nth-child(5){animation-delay:.25s;}
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════ SHARED DOCK ═══════════════ -->
+<script src="shared-navbar.js"></script>
+
+<!-- ═══════════════ PAGE SHELL ═══════════════ -->
+<div class="page-shell">
+
+    <!-- ── LNB ── -->
+    <nav class="lnb">
+        <div class="lnb-title">운영 정보</div>
+
+        <div class="lnb-item active">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            에너지
+        </div>
+        <div class="lnb-sub">
+            <div class="lnb-sub-item active">전력 사용량 조회</div>
+            <div class="lnb-sub-item">전력 사용 예측정보</div>
+            <div class="lnb-sub-item">전력 사용량 통계</div>
+        </div>
+
+        <div class="lnb-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            수질
+        </div>
+        <div class="lnb-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>
+            수압
+        </div>
+        <div class="lnb-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            화학약품
+        </div>
+        <div class="lnb-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            자원화
+        </div>
+        <div class="lnb-divider"></div>
+        <div class="lnb-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            보고서
+        </div>
+    </nav>
+
+    <!-- ── MAIN CONTENT ── -->
+    <div class="main-content">
+
+        <!-- Page Header -->
+        <div class="page-hdr fade-up">
+            <div>
+                <h1>에너지 관리</h1>
+                <div class="page-hdr-sub">전력 사용량 조회 · 예측 · 통계 | Pilot-A · Live</div>
+            </div>
+            <div class="page-hdr-actions">
+                <div class="range-tabs">
+                    <div class="range-tab active">1h</div>
+                    <div class="range-tab">6h</div>
+                    <div class="range-tab">24h</div>
+                    <div class="range-tab">7d</div>
+                </div>
+                <button class="btn">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    CSV 내보내기
+                </button>
+                <button class="btn btn-primary">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.31"/></svg>
+                    새로 고침
+                </button>
+            </div>
+        </div>
+
+        <!-- ── KPI STRIP ── -->
+        <div class="kpi-strip fade-up">
+            <!-- KPI 1: SEC -->
+            <div class="kpi-card highlight">
+                <div class="kpi-label">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    에너지 원단위 (SEC)
+                </div>
+                <div class="kpi-val grad">2.18<span class="kpi-unit" style="-webkit-text-fill-color:#7A9EAB;">kWh/m³</span></div>
+                <div class="kpi-meta">
+                    <span class="kpi-target">목표: 2.2 kWh/m³</span>
+                    <span class="kpi-delta down">▼ 0.02 달성</span>
+                </div>
+                <div class="kpi-bar"><div class="kpi-bar-fill" style="width:99%;background:linear-gradient(90deg,#73CF79,#3978B8);"></div></div>
+            </div>
+
+            <!-- KPI 2: 현재 전력 소모 -->
+            <div class="kpi-card">
+                <div class="kpi-label">현재 전력 소모</div>
+                <div class="kpi-val">4.5<span class="kpi-unit">kW</span></div>
+                <div class="kpi-meta">
+                    <span class="kpi-target">전일 평균: 4.3 kW</span>
+                    <span class="kpi-delta up">▲ 4.7%</span>
+                </div>
+                <div class="kpi-bar"><div class="kpi-bar-fill" style="width:68%;background:#F59E0B;"></div></div>
+            </div>
+
+            <!-- KPI 3: 오늘 누적 전력량 -->
+            <div class="kpi-card">
+                <div class="kpi-label">오늘 누적 전력량</div>
+                <div class="kpi-val">48.2<span class="kpi-unit">kWh</span></div>
+                <div class="kpi-meta">
+                    <span class="kpi-target">당월 누적: 1,240 kWh</span>
+                    <span class="kpi-delta flat">→ 정상</span>
+                </div>
+                <div class="kpi-bar"><div class="kpi-bar-fill" style="width:55%;background:#3978B8;"></div></div>
+            </div>
+
+            <!-- KPI 4: 담수 생산량 -->
+            <div class="kpi-card">
+                <div class="kpi-label">담수 생산량</div>
+                <div class="kpi-val">1,250<span class="kpi-unit">L/h</span></div>
+                <div class="kpi-meta">
+                    <span class="kpi-target">설계용량: 1,000 L/h</span>
+                    <span class="kpi-delta down">▲ 25% 초과달성</span>
+                </div>
+                <div class="kpi-bar"><div class="kpi-bar-fill" style="width:100%;background:#73CF79;"></div></div>
+            </div>
+
+            <!-- KPI 5: 고압펌프 전력 비중 -->
+            <div class="kpi-card">
+                <div class="kpi-label">고압펌프 전력 비중</div>
+                <div class="kpi-val">71<span class="kpi-unit">%</span></div>
+                <div class="kpi-meta">
+                    <span class="kpi-target">전일: 68%</span>
+                    <span class="kpi-delta up">▲ +3%p</span>
+                </div>
+                <div class="kpi-bar"><div class="kpi-bar-fill" style="width:71%;background:#50B8B8;"></div></div>
+            </div>
+        </div>
+
+        <!-- ── ZONE B: 메인 차트 + 사이드 ── -->
+        <div class="section-tag fade-up">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            전력 사용량 조회 · 예측
+        </div>
+
+        <div class="row-2 fade-up">
+            <!-- 시계열 전력 추이 차트 -->
+            <div class="card">
+                <div class="card-hdr">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    <div>
+                        <div class="card-title">전력 소모 추이 (실측 vs. AI 예측)</div>
+                        <div class="card-sub">과거 데이터 + 24h 예측 윈도우 · 1분 갱신</div>
+                    </div>
+                    <div style="margin-left:auto;display:flex;gap:10px;align-items:center;">
+                        <div class="legend">
+                            <div class="legend-item"><div class="legend-line" style="background:#3978B8;"></div> 실측</div>
+                            <div class="legend-item"><div style="width:18px;height:0;border-top:2px dashed #50B8B8;"></div> 예측</div>
+                            <div class="legend-item"><div class="legend-dot" style="background:#EF4444;"></div> 임계초과</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body" style="padding:14px 18px;">
+                    <svg width="100%" height="240" viewBox="0 0 760 240" preserveAspectRatio="xMidYMid meet">
+                        <defs>
+                            <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#3978B8" stop-opacity="0.15"/>
+                                <stop offset="100%" stop-color="#3978B8" stop-opacity="0.01"/>
+                            </linearGradient>
+                            <linearGradient id="predGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#50B8B8" stop-opacity="0.10"/>
+                                <stop offset="100%" stop-color="#50B8B8" stop-opacity="0.01"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- Grid -->
+                        <line x1="50" y1="20" x2="50" y2="210" stroke="#D0E6EC" stroke-width="1"/>
+                        <line x1="50" y1="20" x2="760" y2="20" stroke="#EEF5F7" stroke-width="1" stroke-dasharray="4,3"/>
+                        <line x1="50" y1="60" x2="760" y2="60" stroke="#EEF5F7" stroke-width="1" stroke-dasharray="4,3"/>
+                        <line x1="50" y1="100" x2="760" y2="100" stroke="#EEF5F7" stroke-width="1" stroke-dasharray="4,3"/>
+                        <line x1="50" y1="140" x2="760" y2="140" stroke="#EEF5F7" stroke-width="1" stroke-dasharray="4,3"/>
+                        <line x1="50" y1="180" x2="760" y2="180" stroke="#EEF5F7" stroke-width="1" stroke-dasharray="4,3"/>
+                        <line x1="50" y1="210" x2="760" y2="210" stroke="#D0E6EC" stroke-width="1"/>
+                        <!-- Y-axis labels -->
+                        <text x="42" y="24" font-size="9" fill="#7A9EAB" text-anchor="end">7</text>
+                        <text x="42" y="64" font-size="9" fill="#7A9EAB" text-anchor="end">6</text>
+                        <text x="42" y="104" font-size="9" fill="#7A9EAB" text-anchor="end">5</text>
+                        <text x="42" y="144" font-size="9" fill="#7A9EAB" text-anchor="end">4</text>
+                        <text x="42" y="184" font-size="9" fill="#7A9EAB" text-anchor="end">3</text>
+                        <text x="42" y="214" font-size="9" fill="#7A9EAB" text-anchor="end">2</text>
+                        <text x="14" y="120" font-size="9" fill="#7A9EAB" text-anchor="middle" transform="rotate(-90,14,120)">(kW)</text>
+                        <!-- Threshold -->
+                        <line x1="50" y1="40" x2="760" y2="40" stroke="#EF4444" stroke-width="1" stroke-dasharray="6,3" opacity="0.5"/>
+                        <text x="762" y="43" font-size="8.5" fill="#EF4444">임계 6.5kW</text>
+                        <!-- X-axis labels -->
+                        <text x="80" y="228" font-size="9" fill="#7A9EAB" text-anchor="middle">09:00</text>
+                        <text x="186" y="228" font-size="9" fill="#7A9EAB" text-anchor="middle">09:15</text>
+                        <text x="292" y="228" font-size="9" fill="#7A9EAB" text-anchor="middle">09:30</text>
+                        <text x="398" y="228" font-size="9" fill="#7A9EAB" text-anchor="middle">09:45</text>
+                        <text x="504" y="228" font-size="9" fill="#7A9EAB" text-anchor="middle">10:00</text>
+                        <text x="610" y="228" font-size="9" fill="#7A9EAB" text-anchor="middle">10:30</text>
+                        <text x="716" y="228" font-size="9" fill="#7A9EAB" text-anchor="middle">11:00</text>
+                        <!-- Prediction zone -->
+                        <rect x="504" y="20" width="256" height="190" fill="#50B8B8" opacity="0.04" rx="2"/>
+                        <text x="574" y="35" font-size="9" fill="#50B8B8" opacity="0.7">예측 구간 →</text>
+                        <!-- Actual Area -->
+                        <path d="M80 165 C100 160 120 155 140 145 C160 135 170 130 186 125 C202 120 220 130 240 115 C260 100 270 95 292 110 C314 125 330 120 352 108 C374 96 380 80 398 88 C416 96 430 100 450 90 C470 80 485 75 504 80" fill="url(#areaGrad)" stroke="none"/>
+                        <!-- Actual Line -->
+                        <path d="M80 165 C100 160 120 155 140 145 C160 135 170 130 186 125 C202 120 220 130 240 115 C260 100 270 95 292 110 C314 125 330 120 352 108 C374 96 380 80 398 88 C416 96 430 100 450 90 C470 80 485 75 504 80" fill="none" stroke="#3978B8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <!-- Current point -->
+                        <line x1="504" y1="20" x2="504" y2="210" stroke="#50B8B8" stroke-width="1.5" stroke-dasharray="3,2"/>
+                        <circle cx="504" cy="80" r="5" fill="#3978B8" stroke="white" stroke-width="2"/>
+                        <text x="508" y="76" font-size="9" fill="#3978B8" font-weight="bold">현재 4.5kW</text>
+                        <!-- Prediction Area -->
+                        <path d="M504 80 C520 78 540 72 560 68 C580 64 600 58 620 62 C640 66 660 70 680 65 C700 60 710 56 716 54" fill="url(#predGrad)" stroke="none"/>
+                        <!-- Prediction Line -->
+                        <path d="M504 80 C520 78 540 72 560 68 C580 64 600 58 620 62 C640 66 660 70 680 65 C700 60 710 56 716 54" fill="none" stroke="#50B8B8" stroke-width="2" stroke-dasharray="6,3" stroke-linecap="round"/>
+                        <!-- Confidence interval -->
+                        <path d="M504 80 C520 73 540 65 560 60 C580 55 600 48 620 53 C640 58 660 63 680 57 C700 51 710 46 716 44 L716 64 C710 66 700 69 680 73 C660 77 640 74 620 71 C600 68 580 73 560 76 C540 79 520 83 504 86Z" fill="#50B8B8" opacity="0.07"/>
+                    </svg>
+                    <div style="display:flex;align-items:center;gap:6px;padding-top:4px;">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#50B8B8" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                        <span style="font-size:10.5px;color:#7A9EAB;">예측 모델: AI 기반 24h 예측 · 신뢰구간 95% · 갱신주기 5분</span>
+                        <span style="margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;background:rgba(57,120,184,0.1);color:#3978B8;border:1px solid rgba(57,120,184,0.2);">PSG 예측 엔진</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 사이드 패널 -->
+            <div style="display:flex;flex-direction:column;gap:14px;">
+                <!-- 공정별 전력 비중 도넛 -->
+                <div class="card" style="flex:1;">
+                    <div class="card-hdr">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
+                        <div>
+                            <div class="card-title">공정별 전력 소모 비중</div>
+                            <div class="card-sub">현재 기준 · 총 4.5 kW</div>
+                        </div>
+                    </div>
+                    <div class="card-body" style="padding:12px 18px;">
+                        <div class="donut-wrap">
+                            <svg width="140" height="140" viewBox="-70 -70 140 140">
+                                <path d="M0,-55 A55,55 0 1,1 -52.1,-17.8 L-41.4,-14.1 A43.7,43.7 0 1,0 0,-43.7Z" fill="#3978B8"/>
+                                <path d="M-52.1,-17.8 A55,55 0 0,1 -7.3,-54.5 L-5.8,-43.3 A43.7,43.7 0 0,0 -41.4,-14.1Z" fill="#50B8B8"/>
+                                <path d="M-7.3,-54.5 A55,55 0 0,1 21.3,-50.2 L16.9,-39.9 A43.7,43.7 0 0,0 -5.8,-43.3Z" fill="#73CF79"/>
+                                <path d="M21.3,-50.2 A55,55 0 0,1 0,-55 L0,-43.7 A43.7,43.7 0 0,0 16.9,-39.9Z" fill="#A8C4CE"/>
+                                <text y="-6" text-anchor="middle" font-size="18" font-weight="800" fill="#1A202D">4.5</text>
+                                <text y="10" text-anchor="middle" font-size="9" fill="#7A9EAB">kW</text>
+                            </svg>
+                            <div class="donut-labels">
+                                <div class="donut-row"><div class="donut-dot" style="background:#3978B8;"></div><span class="donut-name">고압펌프 (P-202)</span><span class="donut-kwh">3.2kW</span><span class="donut-pct">71%</span></div>
+                                <div class="donut-row"><div class="donut-dot" style="background:#50B8B8;"></div><span class="donut-name">전처리 (DMF+SF)</span><span class="donut-kwh">0.8kW</span><span class="donut-pct">18%</span></div>
+                                <div class="donut-row"><div class="donut-dot" style="background:#73CF79;"></div><span class="donut-name">약품 주입</span><span class="donut-kwh">0.3kW</span><span class="donut-pct">6%</span></div>
+                                <div class="donut-row"><div class="donut-dot" style="background:#A8C4CE;"></div><span class="donut-name">기타</span><span class="donut-kwh">0.2kW</span><span class="donut-pct">5%</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEC 목표 달성 게이지 -->
+                <div class="card">
+                    <div class="card-hdr" style="padding:12px 18px 10px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        <div>
+                            <div class="card-title">SEC 목표 달성률</div>
+                            <div class="card-sub">목표: 2.2 kWh/m³ 이하</div>
+                        </div>
+                    </div>
+                    <div class="card-body" style="padding:10px 18px 16px;display:flex;flex-direction:column;align-items:center;">
+                        <svg width="200" height="112" viewBox="0 0 200 112">
+                            <path d="M20,100 A80,80 0 0,1 180,100" fill="none" stroke="#EEF5F7" stroke-width="16" stroke-linecap="round"/>
+                            <path d="M134,29 A80,80 0 0,1 180,100" fill="none" stroke="#FECACA" stroke-width="16" stroke-linecap="round"/>
+                            <path d="M20,100 A80,80 0 0,1 134,29" fill="none" stroke="url(#gaugeGrad)" stroke-width="16" stroke-linecap="round"/>
+                            <line x1="100" y1="100" x2="41" y2="26" stroke="#3978B8" stroke-width="3" stroke-linecap="round"/>
+                            <circle cx="100" cy="100" r="7" fill="white" stroke="#3978B8" stroke-width="3"/>
+                            <defs>
+                                <linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="0">
+                                    <stop offset="0%" stop-color="#73CF79"/>
+                                    <stop offset="100%" stop-color="#50B8B8"/>
+                                </linearGradient>
+                            </defs>
+                            <text x="14" y="108" font-size="9" fill="#7A9EAB" text-anchor="middle">1.0</text>
+                            <text x="100" y="16" font-size="9" fill="#7A9EAB" text-anchor="middle">2.2 목표</text>
+                            <text x="186" y="108" font-size="9" fill="#7A9EAB" text-anchor="middle">3.0</text>
+                            <line x1="134" y1="29" x2="127" y2="38" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="3,2"/>
+                        </svg>
+                        <div style="font-size:26px;font-weight:800;color:#1A202D;margin-top:-16px;font-variant-numeric:tabular-nums;">
+                            2.18 <span style="font-size:13px;font-weight:500;color:#7A9EAB;">kWh/m³</span>
+                        </div>
+                        <div class="gauge-badge">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            목표 달성 · 여유 0.02 kWh/m³
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── ZONE C: 통계 섹션 ── -->
+        <div class="section-tag fade-up">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+            전력 사용량 통계
+        </div>
+
+        <div class="card fade-up">
+            <!-- Tab header -->
+            <div style="display:flex;align-items:center;padding:0 20px;">
+                <div class="stat-tabs" style="border-bottom:none;flex:1;">
+                    <div class="stat-tab active">일간</div>
+                    <div class="stat-tab">주간</div>
+                    <div class="stat-tab">월간</div>
+                    <div class="stat-tab">기간 지정</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding:8px 0;">
+                    <div class="date-input">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        2026-03-20
+                    </div>
+                    <button class="btn" style="padding:5px 12px;font-size:11.5px;">조회</button>
+                </div>
+            </div>
+
+            <!-- Tab content -->
+            <div class="stat-layout">
+                <!-- Left: Bar chart -->
+                <div class="stat-chart-area">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                        <span style="font-size:12px;font-weight:700;color:#3D5A6A;">시간대별 전력 사용량 (kWh) — 2026-03-20</span>
+                        <div class="legend">
+                            <div class="legend-item"><div class="legend-dot" style="background:#3978B8;"></div> 전력량(kWh)</div>
+                            <div class="legend-item"><div class="legend-dot" style="background:#73CF79;"></div> SEC(kWh/m³)</div>
+                        </div>
+                    </div>
+                    <svg width="100%" height="180" viewBox="0 0 640 180" preserveAspectRatio="xMidYMid meet">
+                        <line x1="40" y1="10" x2="40" y2="155" stroke="#D0E6EC" stroke-width="1"/>
+                        <line x1="40" y1="10" x2="640" y2="10" stroke="#EEF5F7" stroke-width="1" stroke-dasharray="4,3"/>
+                        <line x1="40" y1="50" x2="640" y2="50" stroke="#EEF5F7" stroke-width="1" stroke-dasharray="4,3"/>
+                        <line x1="40" y1="90" x2="640" y2="90" stroke="#EEF5F7" stroke-width="1" stroke-dasharray="4,3"/>
+                        <line x1="40" y1="130" x2="640" y2="130" stroke="#EEF5F7" stroke-width="1" stroke-dasharray="4,3"/>
+                        <line x1="40" y1="155" x2="640" y2="155" stroke="#D0E6EC" stroke-width="1"/>
+                        <text x="32" y="14" font-size="9" fill="#7A9EAB" text-anchor="end">6</text>
+                        <text x="32" y="54" font-size="9" fill="#7A9EAB" text-anchor="end">5</text>
+                        <text x="32" y="94" font-size="9" fill="#7A9EAB" text-anchor="end">4</text>
+                        <text x="32" y="134" font-size="9" fill="#7A9EAB" text-anchor="end">3</text>
+                        <text x="14" y="90" font-size="9" fill="#7A9EAB" text-anchor="middle" transform="rotate(-90,14,90)">(kWh)</text>
+                        <line x1="40" y1="50" x2="640" y2="50" stroke="#EF4444" stroke-width="1" stroke-dasharray="5,3" opacity="0.5"/>
+                        <defs>
+                            <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#50B8B8"/>
+                                <stop offset="100%" stop-color="#3978B8"/>
+                            </linearGradient>
+                        </defs>
+                        <g fill="#3978B8" opacity="0.85">
+                            <rect x="48" y="110" width="14" height="45" rx="2"/>
+                            <rect x="73" y="105" width="14" height="50" rx="2"/>
+                            <rect x="98" y="100" width="14" height="55" rx="2"/>
+                            <rect x="123" y="95" width="14" height="60" rx="2"/>
+                            <rect x="148" y="90" width="14" height="65" rx="2"/>
+                            <rect x="173" y="88" width="14" height="67" rx="2"/>
+                            <rect x="198" y="85" width="14" height="70" rx="2"/>
+                            <rect x="223" y="80" width="14" height="75" rx="2"/>
+                            <rect x="248" y="78" width="14" height="77" rx="2"/>
+                            <rect x="273" y="75" width="14" height="80" rx="2"/>
+                        </g>
+                        <rect x="273" y="75" width="14" height="80" rx="2" fill="url(#barGrad)"/>
+                        <polyline points="55,108 80,100 105,95 130,88 155,80 180,82 205,75 230,70 255,68 280,66" fill="none" stroke="#73CF79" stroke-width="2" stroke-dasharray="5,2"/>
+                        <text x="55" y="170" font-size="8.5" fill="#7A9EAB" text-anchor="middle">00:00</text>
+                        <text x="105" y="170" font-size="8.5" fill="#7A9EAB" text-anchor="middle">02:00</text>
+                        <text x="155" y="170" font-size="8.5" fill="#7A9EAB" text-anchor="middle">04:00</text>
+                        <text x="205" y="170" font-size="8.5" fill="#7A9EAB" text-anchor="middle">06:00</text>
+                        <text x="255" y="170" font-size="8.5" fill="#7A9EAB" text-anchor="middle">08:00</text>
+                        <text x="280" y="170" font-size="8.5" fill="#3978B8" text-anchor="middle" font-weight="bold">현재</text>
+                    </svg>
+                </div>
+
+                <!-- Right: Stats summary + table -->
+                <div class="stat-table-area">
+                    <div class="stat-summary">
+                        <div class="stat-sum-card">
+                            <div class="stat-sum-label">일 누적 전력량</div>
+                            <div class="stat-sum-val">48.2<span class="stat-sum-unit">kWh</span></div>
+                        </div>
+                        <div class="stat-sum-card">
+                            <div class="stat-sum-label">일 평균 SEC</div>
+                            <div class="stat-sum-val">2.20<span class="stat-sum-unit">kWh/m³</span></div>
+                        </div>
+                        <div class="stat-sum-card">
+                            <div class="stat-sum-label">일 최대 전력</div>
+                            <div class="stat-sum-val">5.1<span class="stat-sum-unit">kW</span></div>
+                        </div>
+                        <div class="stat-sum-card">
+                            <div class="stat-sum-label">목표 대비</div>
+                            <div class="stat-sum-val" style="color:#2E7D32;">달성<span class="stat-sum-unit" style="color:#7A9EAB;">100%</span></div>
+                        </div>
+                    </div>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>시간대</th>
+                                <th style="text-align:right;">전력(kWh)</th>
+                                <th style="text-align:right;">SEC</th>
+                                <th style="text-align:right;">담수량(L)</th>
+                                <th style="text-align:center;">상태</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>00:00~01:00</td><td class="td-num">4.2</td><td class="td-num td-good">2.18</td><td class="td-num">1,927</td><td style="text-align:center;"><span style="color:#73CF79;font-size:10px;font-weight:700;">●</span> 정상</td></tr>
+                            <tr><td>01:00~02:00</td><td class="td-num">4.4</td><td class="td-num td-good">2.20</td><td class="td-num">2,000</td><td style="text-align:center;"><span style="color:#73CF79;font-size:10px;font-weight:700;">●</span> 정상</td></tr>
+                            <tr><td>02:00~03:00</td><td class="td-num">4.6</td><td class="td-num td-warn">2.28</td><td class="td-num">2,018</td><td style="text-align:center;"><span style="color:#F59E0B;font-size:10px;font-weight:700;">●</span> 주의</td></tr>
+                            <tr><td>03:00~04:00</td><td class="td-num">4.5</td><td class="td-num td-good">2.19</td><td class="td-num">2,055</td><td style="text-align:center;"><span style="color:#73CF79;font-size:10px;font-weight:700;">●</span> 정상</td></tr>
+                            <tr><td>04:00~05:00</td><td class="td-num">4.3</td><td class="td-num td-good">2.15</td><td class="td-num">2,000</td><td style="text-align:center;"><span style="color:#73CF79;font-size:10px;font-weight:700;">●</span> 정상</td></tr>
+                            <tr><td>05:00~06:00</td><td class="td-num">4.4</td><td class="td-num td-good">2.17</td><td class="td-num">2,028</td><td style="text-align:center;"><span style="color:#73CF79;font-size:10px;font-weight:700;">●</span> 정상</td></tr>
+                            <tr><td>06:00~07:00</td><td class="td-num">4.5</td><td class="td-num td-good">2.18</td><td class="td-num">2,064</td><td style="text-align:center;"><span style="color:#73CF79;font-size:10px;font-weight:700;">●</span> 정상</td></tr>
+                            <tr><td>07:00~08:00</td><td class="td-num">4.7</td><td class="td-num td-good">2.21</td><td class="td-num">2,127</td><td style="text-align:center;"><span style="color:#73CF79;font-size:10px;font-weight:700;">●</span> 정상</td></tr>
+                            <tr><td>08:00~09:00</td><td class="td-num">4.6</td><td class="td-num td-good">2.19</td><td class="td-num">2,100</td><td style="text-align:center;"><span style="color:#73CF79;font-size:10px;font-weight:700;">●</span> 정상</td></tr>
+                            <tr style="font-weight:600;"><td style="color:#3978B8;">09:00~현재</td><td class="td-num" style="font-weight:700;">4.5</td><td class="td-num td-good" style="font-weight:700;">2.18</td><td class="td-num" style="font-weight:700;">1,250</td><td style="text-align:center;"><span style="color:#73CF79;font-size:10px;font-weight:700;">●</span> 정상</td></tr>
+                        </tbody>
+                    </table>
+                    <div style="text-align:right;margin-top:8px;">
+                        <button class="btn" style="font-size:11px;padding:5px 11px;">
+                            전체 보기 (24행)
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="height:40px;"></div>
+
+    </div><!-- main-content -->
+</div><!-- page-shell -->
+
+</body>
+</html>
