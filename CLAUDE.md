@@ -26,7 +26,7 @@ Static HTML pages (no build system, no framework). Each page is a self-contained
 ├── models/         ← 3D 모델 (GLB)
 ├── scripts/        ← JS, Python 도구
 ├── docs/           ← 디자인 가이드 등
-├── memory/         ← 프로젝트 컨텍스트
+├── references/     ← 참고 문서·프로젝트 컨텍스트
 ```
 
 ### Key Files
@@ -62,10 +62,10 @@ Key principles:
 - Cards: `background:white; border-radius:14px; border:1px solid rgba(80,184,184,0.1);`
 - All pages use fixed `1920x1080` viewport with `fitViewport()` scaling from `shared-navbar.js`
 
-## Memory (프로젝트 컨텍스트)
+## References (참고 문서·프로젝트 컨텍스트)
 
-`memory/` 디렉토리에 과제 배경, 회의 정리, 기획 문서 등 프로젝트 맥락 파일이 보관되어 있다.
-새로운 작업 시 관련 파일을 참조하여 맥락을 파악할 것. 목록은 [`memory/README.md`](memory/README.md) 참조.
+`references/` 디렉토리에 과제 배경, 회의 정리, 기획 문서 등 프로젝트 맥락 파일이 보관되어 있다.
+새로운 작업 시 관련 파일을 참조하여 맥락을 파악할 것. 목록은 [`references/README.md`](references/README.md) 참조.
 
 ## Commands
 
