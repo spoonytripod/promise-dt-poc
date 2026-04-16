@@ -2,11 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Work Rules
+## 작업 규칙
 
-- 모든 응답은 다른 언어가 필요한 경우가 아니라면 반드시 **한국어**로 작성한다.
-- 작업이 불명확하거나 불분명하다고 판단되는 경우, 추측하지 말고 반드시 질문하여 답변에 따라 행동한다.
-- 절대로 승인 없이 파일을 삭제하지 않는다.
 - 메모리를 저장할 때는 반드시 `.claude/memory/` 폴더에 저장한다. 개인 정보(사용자 신상, 연락처 등)는 `.claude/memory/personal/`에 저장한다. 로컬 메모리 경로(`~/.claude/...`)에는 저장하지 않는다.
 
 ## Project Overview
