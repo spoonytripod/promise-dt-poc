@@ -54,7 +54,7 @@ Key principles:
 - **Light theme only** — all pages use `#EBF3F5` background with white cards. Never use dark backgrounds for content areas.
 - Brand colors: `--c-green:#73CF79`, `--c-mint:#50B8B8`, `--c-blue:#3978B8`, `--c-navy:#1A202D`
 - Gradients: `--grad-main` (135deg green→mint→blue), `--grad-h` (horizontal)
-- Fonts: Plus Jakarta Sans (UI), JetBrains Mono (monospace/data)
+- Font: Noto Sans KR (단일 폰트, 회사 디자인 가이드 준수)
 - Dock height: `--dock-h: 84px` — all page content must account for this fixed top bar
 - Cards: `background:white; border-radius:14px; border:1px solid rgba(80,184,184,0.1);`
 - All pages use fixed `1920x1080` viewport with `fitViewport()` scaling from `shared-navbar.js`

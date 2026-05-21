@@ -61,8 +61,8 @@
 ## Typography
 
 ### Fonts
-- UI: `'Plus Jakarta Sans', sans-serif`
-- Data/Mono: `'JetBrains Mono', monospace`
+- Single family: `'Noto Sans KR', sans-serif` (UI·본문·수치·심볼 모두 동일 폰트)
+- 회사 디자인 가이드(v1.0.0) 준수: 국문·영문·숫자·기호 통일
 
 ### Sizes
 | Element        | Size   | Weight | Color    |

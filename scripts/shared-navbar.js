@@ -114,7 +114,7 @@
         .dock-item:hover::before{opacity:1;}
         .dock-sep{width:2px;height:40px;background:var(--border-strong);margin:0 6px;}
         .tb-sep{width:2px;height:40px;background:var(--border-strong);flex-shrink:0;}
-        .tb-clock{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500;color:var(--text-2);letter-spacing:0.05em;white-space:nowrap;}
+        .tb-clock{font-family:'Noto Sans KR',sans-serif;font-size:16px;font-weight:500;color:var(--text-2);letter-spacing:0.05em;white-space:nowrap;}
         .tb-weather{font-size:15px;color:var(--text-2);background:rgba(0,0,0,0.04);padding:9px 22px;border-radius:100px;white-space:nowrap;flex-shrink:0;}
         .icon-btn{position:relative;background:none;border:none;cursor:pointer;width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;transition:background 0.15s;}
         .icon-btn:hover{background:rgba(0,0,0,0.06);}
