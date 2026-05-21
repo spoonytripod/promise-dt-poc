@@ -8,8 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**PROMISE DT** — 해수담수화 플랜트 디지털 트윈 와이어프레임/프로토타입.
-KSEAWATER02 과제(디지털 담수화 플랜트 농축수 자원화 기술개발사업) 2차년도 시스템 기획 단계의 UI 와이어프레임.
+**PROMISE DT** — 해수담수화 플랜트 디지털 트윈 PoC (Proof of Concept).
+KSEAWATER02 과제(디지털 담수화 플랜트 농축수 자원화 기술개발사업) 2차년도 시스템 기획 단계의 UI PoC. 와이어프레임에 디자인까지 입힌 버전.
 
 ## Architecture
 
