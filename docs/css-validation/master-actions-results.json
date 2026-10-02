@@ -1,0 +1,38 @@
+[
+  {
+    "browser": "Chrome",
+    "mode": "web",
+    "result": "PASS",
+    "tables": 4,
+    "firstColumn": "처리",
+    "editDialogs": 4,
+    "removeConfirmations": 3
+  },
+  {
+    "browser": "Chrome",
+    "mode": "file",
+    "result": "PASS",
+    "tables": 4,
+    "firstColumn": "처리",
+    "editDialogs": 4,
+    "removeConfirmations": 3
+  },
+  {
+    "browser": "Edge",
+    "mode": "web",
+    "result": "PASS",
+    "tables": 4,
+    "firstColumn": "처리",
+    "editDialogs": 4,
+    "removeConfirmations": 3
+  },
+  {
+    "browser": "Edge",
+    "mode": "file",
+    "result": "PASS",
+    "tables": 4,
+    "firstColumn": "처리",
+    "editDialogs": 4,
+    "removeConfirmations": 3
+  }
+]

@@ -17,6 +17,9 @@ import json
 import os
 import re
 import sys
+import mimetypes
+from html.parser import HTMLParser
+from urllib.parse import urlsplit
 
 # ── 경로 설정 (스크립트 위치 기준 → 프로젝트 루트) ────────────────────────
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -149,11 +152,60 @@ def inline_asset_dependencies(html: str) -> str:
             code = source.read().replace('</script', '<\\/script')
         return '<script>\n' + code + '\n</script>'
 
-    html = re.sub(r'<script src="(../scripts/(?:asset-[^"/]+|vendor/xlsx.full.min)\.js)"></script>', script, html)
-    with open(os.path.join(SCRIPT_DIR, 'asset-ui.css'), 'r', encoding='utf-8') as source:
-        html = html.replace('<link href="../scripts/asset-ui.css" rel="stylesheet">',
-                            '<style>' + source.read() + '</style>')
+    html = re.sub(r'<script src="(../scripts/(?:asset-[^"/]+|vendor/xlsx.full.min)\.js)(?:\?[^" ]*)?"></script>', script, html)
     return html.replace('<head>', '<head><script>window.ASSET_STANDALONE_CLIENT=true;</script>', 1)
+
+
+def inline_local_stylesheets(html: str) -> str:
+    """실제 link 태그만 처리하여 JavaScript 문자열의 치환을 방지합니다."""
+    replacements = []
+    lines = html.splitlines(keepends=True)
+    offsets = [0]
+    for line in lines:
+        offsets.append(offsets[-1] + len(line))
+
+    class StylesheetParser(HTMLParser):
+        def handle_starttag(self, tag, attrs):
+            attrs = dict(attrs)
+            if tag != 'link' or 'stylesheet' not in attrs.get('rel', '').lower().split():
+                return
+            href = attrs.get('href', '')
+            url = urlsplit(href)
+            if url.scheme or url.netloc:
+                return  # 외부 글꼴 스타일시트는 기존처럼 유지
+            path = os.path.realpath(os.path.join(PAGES_DIR, url.path))
+            if os.path.commonpath([os.path.realpath(ROOT_DIR), path]) != os.path.realpath(ROOT_DIR):
+                raise ValueError(f'프로젝트 밖의 CSS 경로: {href}')
+            with open(path, 'r', encoding='utf-8') as source:
+                css = source.read()
+            if re.search(r'@import\b', re.sub(r'/\*.*?\*/', '', css, flags=re.S), re.I):
+                raise ValueError(f'CSS @import 대신 HTML에 stylesheet 링크를 추가하십시오: {href}')
+
+            def resource(match):
+                value = match.group(2).strip()
+                resource_url = urlsplit(value)
+                if resource_url.scheme or resource_url.netloc or value.startswith('#'):
+                    return match.group(0)
+                resource_path = os.path.realpath(os.path.join(os.path.dirname(path), resource_url.path))
+                if os.path.commonpath([os.path.realpath(ROOT_DIR), resource_path]) != os.path.realpath(ROOT_DIR):
+                    raise ValueError(f'프로젝트 밖의 CSS 리소스: {value}')
+                with open(resource_path, 'rb') as resource_file:
+                    encoded = base64.b64encode(resource_file.read()).decode('ascii')
+                mime = mimetypes.guess_type(resource_path)[0] or 'application/octet-stream'
+                fragment = '#' + resource_url.fragment if resource_url.fragment else ''
+                return f'url("data:{mime};base64,{encoded}{fragment}")'
+
+            css = re.sub(r'url\(\s*([\'"]?)(.*?)\1\s*\)', resource, css, flags=re.I)
+            css = re.sub(r'</style', lambda m: '<\\/' + m.group(0)[2:], css, flags=re.I)
+            line, column = self.getpos()
+            start = offsets[line - 1] + column
+            replacements.append((start, start + len(self.get_starttag_text()), '<style>\n' + css + '\n</style>'))
+
+    parser = StylesheetParser()
+    parser.feed(html)
+    for start, end, replacement in reversed(replacements):
+        html = html[:start] + replacement + html[end:]
+    return html
 
 
 # ── 각 페이지 로드 & 처리 ────────────────────────────────────────────────
@@ -168,6 +220,9 @@ for page_id, filename in FILES.items():
     print(f"\n▶  {filename}  (id: {page_id})")
     with open(path, 'r', encoding='utf-8') as f:
         html = f.read()
+
+    # 모든 페이지의 공통 및 전용 CSS를 링크 순서대로 내장
+    html = inline_local_stylesheets(html)
 
     # 로컬 이미지 임베드 (pages/ 기준 상대경로 해석)
     html = embed_images(html, PAGES_DIR)

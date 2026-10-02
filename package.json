@@ -5,7 +5,8 @@
   "scripts": {
     "test": "node scripts/test-asset-domain.cjs",
     "test:storage": "node scripts/test-asset-storage.cjs",
-    "test:browser": "node scripts/test-asset-browser.cjs"
+    "test:browser": "node scripts/test-asset-browser.cjs",
+    "test:css": "node scripts/test-css-browser.cjs"
   },
   "devDependencies": { "playwright": "1.63.0" }
 }

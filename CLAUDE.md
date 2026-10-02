@@ -13,7 +13,7 @@ KSEAWATER02 과제(디지털 담수화 플랜트 농축수 자원화 기술개�
 
 ## Architecture
 
-Static HTML pages (no build system, no framework). Each page is a self-contained single-file HTML with inline CSS and JS. Pages share a common design language via CSS variables and a shared navigation bar.
+Static HTML pages (no build system, no framework). Pages load external CSS from `styles/`, combining shared design tokens and components with page-specific styles. JavaScript remains inline in existing pages or separate in `scripts/` for asset management and shared functionality.
 
 ### Directory Structure
 
@@ -22,16 +22,21 @@ Static HTML pages (no build system, no framework). Each page is a self-contained
 ├── assets/         ← 이미지 (CI 로고 등)
 ├── models/         ← 3D 모델 (GLB)
 ├── scripts/        ← JS, Python 도구
+├── styles/         ← 공통 CSS와 페이지별 CSS
 ├── docs/           ← 디자인 가이드 등
 ├── references/     ← 참고 문서·프로젝트 컨텍스트
 ```
 
 ### Key Files
 
-- **`scripts/shared-navbar.js`** — Shared top dock/navbar injected into every page at runtime. Defines menu structure (`MENUS`), SVG icons, active-page detection, clock, and all dock CSS. Include via `<script src="../scripts/shared-navbar.js"></script>`.
+- **`styles/common.css`** — Shared design tokens, font family and fixed viewport rules.
+- **`styles/components.css`** — Identical components for the five dashboard pages, scoped with `:where(.dashboard-page)` to preserve specificity and avoid changing asset, login or main styles.
+- **`styles/navbar.css`** — Shared top dock styles. Load after page CSS on every page with a dock.
+- **`styles/pages/*.css`** — Page-specific styles, including `asset.css` moved from `scripts/asset-ui.css`.
+- **`scripts/shared-navbar.js`** — Shared top dock/navbar injected at runtime. Defines menu structure (`MENUS`), SVG icons, active-page detection and clock. It does not inject CSS. Load the stylesheets first, then include `<script src="../scripts/shared-navbar.js"></script>`.
 - **`scripts/create_standalone.py`** — Python bundler that merges all HTML pages into a single `demo_standalone.html` for offline demo. Embeds images as Base64, inlines `shared-navbar.js`, embeds the GLB 3D model, and patches `window.location.href` navigation to `postMessage` routing between iframes.
-- **`demo_standalone.html`** — Generated output (~200MB). Do not edit manually; regenerate with `uv run scripts/create_standalone.py`.
-- **`models/concept.glb`** — 3D plant model loaded by `pages/main.html` via Three.js.
+- **`demo_standalone.html`** — Generated output. Do not edit manually; regenerate with `uv run scripts/create_standalone.py`. The bundler embeds local stylesheets in their original order and inlines local CSS resources.
+- **`models/seperated_comp.glb`** — Current 3D plant model loaded by `pages/main.html` via Three.js.
 
 ### Pages (in `pages/`)
 
@@ -78,4 +83,4 @@ This bundles all HTML pages + assets into `demo_standalone.html`. Run from the p
 - Navigation between pages uses `window.location.href = 'page-xxx.html'`. The standalone bundler patches these to `postMessage` calls.
 - Korean language UI throughout. Comments in source are also Korean.
 - CI logos: `assets/main_ci.png` (navbar logo), `assets/login_ci.png` (login page logo).
-- When adding a new page: add it to `pages/`, add its menu entry to the `MENUS` array in `scripts/shared-navbar.js`, and include `<script src="../scripts/shared-navbar.js"></script>` in the page. The bundler auto-discovers all `.html` files in `pages/`.
+- When adding a new page: add it to `pages/`, add a dedicated CSS file in `styles/pages/`, and load `common.css`, `components.css`, page CSS, then `navbar.css`. Use `dashboard-page` on the body only when adopting the shared dashboard components. Add its menu entry to `MENUS` and include `shared-navbar.js`. The bundler auto-discovers HTML files and local stylesheet links. See `styles/README.md`.

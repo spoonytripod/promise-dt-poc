@@ -5,18 +5,23 @@
   <meta name="viewport" content="width=1920">
   <title>설계 정보 및 자산 관리 — PROMISE DT</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link href="../scripts/asset-ui.css" rel="stylesheet">
+    <link rel="stylesheet" href="../styles/common.css">
+    <link rel="stylesheet" href="../styles/components.css?v=asset-nav-20261002">
+    <link rel="stylesheet" href="../styles/pages/asset.css?v=asset-actions-20261002">
+    <link rel="stylesheet" href="../styles/navbar.css">
 </head>
-<body>
+<body class="asset-page">
   <div class="page-shell">
     <aside class="lnb">
-      <div class="eyebrow">ASSET MANAGEMENT</div>
+      <div class="lnb-title">설계 정보 및 자산 관리</div>
       <nav id="asset-nav" aria-label="자산 관리 내부 메뉴"></nav>
-      <div class="side-note"><strong>예시 데이터 시제품</strong><p>설비와 예비 자산의 업무 흐름을 확인합니다. 밸브와 계측기는 태그 정보만 조회합니다.</p><p>이 브라우저에 데이터와 파일을 저장합니다. 브라우저 데이터를 삭제하면 보관 내용도 사라집니다. Web과 단일 HTML은 자동 동기화되지 않습니다.</p></div>
-      <label class="actor-label">입력 작업자명 <input id="actor" value="예시 작업자" maxlength="80" required></label>
-      <small>인증된 사용자 기록이 아닙니다.</small>
-      <button id="reset" class="danger">예시 데이터 초기화</button>
-      <button id="reload">저장 데이터 새로고침</button>
+      <div class="asset-sidebar-tools">
+        <div class="side-note"><strong>예시 데이터 시제품</strong><p>설비와 예비 자산의 업무 흐름을 확인합니다. 밸브와 계측기는 태그 정보만 조회합니다.</p><p>이 브라우저에 데이터와 파일을 저장합니다. 브라우저 데이터를 삭제하면 보관 내용도 사라집니다. Web과 단일 HTML은 자동 동기화되지 않습니다.</p></div>
+        <label class="actor-label">입력 작업자명 <input id="actor" value="예시 작업자" maxlength="80" required></label>
+        <small>인증된 사용자 기록이 아닙니다.</small>
+        <button id="reset" class="danger">예시 데이터 초기화</button>
+        <button id="reload">저장 데이터 새로고침</button>
+      </div>
     </aside>
     <main>
       <header><div><h1>설계 정보 및 자산 관리</h1><p>태그 위치와 실물 자산을 구분하여 설치부터 점검 이력까지 관리합니다.</p></div><span id="storage-status" role="status">저장소 연결 중</span></header>
@@ -31,6 +36,6 @@
   <script src="../scripts/vendor/xlsx.full.min.js"></script>
   <script src="../scripts/asset-store.js"></script>
   <script src="../scripts/asset-domain.js"></script>
-  <script src="../scripts/asset-app.js"></script>
+  <script src="../scripts/asset-app.js?v=asset-actions-20261002"></script>
 </body>
 </html>

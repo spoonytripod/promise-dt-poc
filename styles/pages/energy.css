@@ -1,0 +1,525 @@
+/* energy 페이지 전용 스타일 */
+*,*::before,*::after {
+    margin:0;
+    padding:0;
+}
+
+body {
+    background:#EBF3F5;
+    color:#1A202D;
+    -webkit-font-smoothing:antialiased;
+}
+
+/* ── PAGE LAYOUT ── */
+/* ── LEFT NAV ── */
+.lnb-sub {
+    padding:2px 0 6px 46px;
+}
+
+.lnb-sub-item {
+    font-size:12.5px;
+    color:#7A9EAB;
+    padding:5px 12px;
+    border-radius:6px;
+    cursor:pointer;
+    transition:all 0.1s;
+}
+
+.lnb-sub-item:hover {
+    color:#50B8B8;
+    background:rgba(80,184,184,0.05);
+}
+
+.lnb-sub-item.active {
+    color:#3978B8;
+    font-weight:600;
+    background:rgba(57,120,184,0.06);
+}
+
+/* ── MAIN CONTENT ── */
+.main-content {
+    flex:1;
+    overflow-y:auto;
+    padding:24px 32px 40px;
+    background:#EBF3F5;
+}
+
+/* Page Header */
+.page-hdr h1 {
+    font-size:22px;
+    font-weight:800;
+    letter-spacing:-0.02em;
+    background:linear-gradient(90deg,#73CF79,#50B8B8,#3978B8);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.page-hdr-actions {
+    display:flex;
+    gap:8px;
+    align-items:center;
+}
+
+/* Buttons */
+.btn-primary:hover {
+    box-shadow:0 4px 16px rgba(57,120,184,0.3);
+}
+
+/* Range Tabs */
+.range-tabs {
+    display:flex;
+    gap:2px;
+    background:rgba(80,184,184,0.08);
+    border-radius:8px;
+    padding:3px;
+}
+
+.range-tab {
+    padding:5px 14px;
+    border-radius:6px;
+    font-size:12px;
+    font-weight:600;
+    color:#7A9EAB;
+    cursor:pointer;
+    transition:all 0.12s;
+}
+
+.range-tab.active {
+    background:white;
+    color:#3978B8;
+    box-shadow:0 1px 4px rgba(0,0,0,0.08);
+}
+
+/* ── KPI STRIP ── */
+.kpi-strip {
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:14px;
+    margin-bottom:22px;
+}
+
+.kpi-card {
+    background:white;
+    border-radius:14px;
+    padding:16px 18px;
+    border:1px solid rgba(80,184,184,0.1);
+    transition:all 0.2s;
+    position:relative;
+    overflow:hidden;
+}
+
+.kpi-card:hover {
+    box-shadow:0 6px 24px rgba(80,184,184,0.12);
+    transform:translateY(-2px);
+}
+
+.kpi-card.highlight {
+    border-color:rgba(80,184,184,0.25);
+}
+
+.kpi-card.highlight::after {
+    content:'';
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    height:3px;
+    background:linear-gradient(90deg,#73CF79,#50B8B8,#3978B8);
+}
+
+.kpi-label {
+    font-size:11.5px;
+    font-weight:600;
+    color:#7A9EAB;
+    display:flex;
+    align-items:center;
+    gap:5px;
+    margin-bottom:8px;
+}
+
+.kpi-val {
+    font-size:28px;
+    font-weight:800;
+    color:#1A202D;
+    font-variant-numeric:tabular-nums;
+    line-height:1;
+}
+
+.kpi-val.grad {
+    background:linear-gradient(90deg,#73CF79,#50B8B8,#3978B8);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.kpi-unit {
+    font-size:13px;
+    font-weight:500;
+    color:#7A9EAB;
+    margin-left:3px;
+}
+
+.kpi-meta {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:8px;
+    font-size:11px;
+}
+
+.kpi-target {
+    color:#A8C4CE;
+}
+
+.kpi-delta {
+    font-weight:700;
+    padding:2px 6px;
+    border-radius:4px;
+    font-size:10.5px;
+}
+
+.kpi-delta.down {
+    color:#2E7D32;
+    background:rgba(115,207,121,0.12);
+}
+
+.kpi-delta.up {
+    color:#DC2626;
+    background:rgba(239,68,68,0.08);
+}
+
+.kpi-delta.flat {
+    color:#3978B8;
+    background:rgba(57,120,184,0.08);
+}
+
+.kpi-bar {
+    height:4px;
+    border-radius:4px;
+    background:rgba(80,184,184,0.08);
+    margin-top:10px;
+    overflow:hidden;
+}
+
+.kpi-bar-fill {
+    height:100%;
+    border-radius:4px;
+    transition:width 1s ease;
+}
+
+/* ── CARDS ── */
+.card-hdr svg {
+    flex-shrink:0;
+    color:#50B8B8;
+}
+
+.card-title {
+    font-size:13.5px;
+    font-weight:700;
+    color:#1A202D;
+}
+
+/* ── GRID LAYOUTS ── */
+.row-2 {
+    display:grid;
+    grid-template-columns:1fr 340px;
+    gap:16px;
+    margin-bottom:18px;
+}
+
+/* ── Legend ── */
+.legend {
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+}
+
+.legend-item {
+    display:flex;
+    align-items:center;
+    gap:5px;
+    font-size:11px;
+    color:#3D5A6A;
+}
+
+.legend-line {
+    width:18px;
+    height:2.5px;
+    border-radius:1px;
+}
+
+.legend-dot {
+    width:8px;
+    height:8px;
+    border-radius:50%;
+}
+
+/* ── Donut ── */
+.donut-wrap {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:10px 0;
+}
+
+.donut-labels {
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    margin-top:12px;
+}
+
+.donut-row {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:7px 10px;
+    border-radius:8px;
+    background:rgba(80,184,184,0.03);
+    transition:background 0.12s;
+}
+
+.donut-row:hover {
+    background:rgba(80,184,184,0.07);
+}
+
+.donut-dot {
+    width:10px;
+    height:10px;
+    border-radius:3px;
+    flex-shrink:0;
+}
+
+.donut-name {
+    flex:1;
+    font-size:12px;
+    color:#3D5A6A;
+    font-weight:500;
+}
+
+.donut-kwh {
+    font-size:10.5px;
+    color:#7A9EAB;
+}
+
+.donut-pct {
+    font-size:12px;
+    font-weight:700;
+    color:#1A202D;
+}
+
+/* ── Gauge ── */
+.gauge-badge {
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    font-size:11px;
+    font-weight:600;
+    padding:4px 12px;
+    border-radius:6px;
+    background:rgba(115,207,121,0.12);
+    color:#2E7D32;
+    border:1px solid rgba(115,207,121,0.3);
+    margin-top:8px;
+}
+
+/* ── Stats Section ── */
+.stat-tabs {
+    display:flex;
+    gap:0;
+    border-bottom:1px solid rgba(80,184,184,0.1);
+}
+
+.stat-tab {
+    padding:11px 18px;
+    font-size:12.5px;
+    font-weight:600;
+    color:#7A9EAB;
+    cursor:pointer;
+    border-bottom:2px solid transparent;
+    margin-bottom:-1px;
+    transition:all 0.12s;
+}
+
+.stat-tab.active {
+    color:#3978B8;
+    border-bottom-color:#3978B8;
+}
+
+.stat-tab:not(.active):hover {
+    color:#3D5A6A;
+}
+
+.stat-layout {
+    display:grid;
+    grid-template-columns:1fr 380px;
+}
+
+.stat-chart-area {
+    padding:18px 20px;
+    border-right:1px solid rgba(80,184,184,0.08);
+}
+
+.stat-table-area {
+    padding:18px 20px;
+}
+
+.stat-summary {
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+    margin-bottom:16px;
+}
+
+.stat-sum-card {
+    background:rgba(80,184,184,0.04);
+    border-radius:10px;
+    padding:10px 12px;
+    border:1px solid rgba(80,184,184,0.08);
+}
+
+.stat-sum-label {
+    font-size:10.5px;
+    color:#7A9EAB;
+    margin-bottom:4px;
+    font-weight:600;
+}
+
+.stat-sum-val {
+    font-size:18px;
+    font-weight:800;
+    color:#1A202D;
+    font-variant-numeric:tabular-nums;
+}
+
+.stat-sum-unit {
+    font-size:11px;
+    color:#7A9EAB;
+    margin-left:3px;
+}
+
+/* ── Data Table ── */
+.data-table {
+    width:100%;
+    border-collapse:collapse;
+}
+
+.data-table th {
+    font-size:10.5px;
+    font-weight:700;
+    letter-spacing:0.5px;
+    text-transform:uppercase;
+    color:#7A9EAB;
+    padding:7px 10px;
+    text-align:left;
+    border-bottom:2px solid rgba(80,184,184,0.12);
+    background:rgba(80,184,184,0.03);
+}
+
+.data-table td {
+    padding:8px 10px;
+    border-bottom:1px solid rgba(80,184,184,0.06);
+    font-size:12.5px;
+    color:#3D5A6A;
+}
+
+.data-table tr:last-child td {
+    border-bottom:none;
+}
+
+.data-table tr:hover td {
+    background:rgba(80,184,184,0.04);
+}
+
+.td-num {
+    font-variant-numeric:tabular-nums;
+    font-weight:600;
+    color:#1A202D;
+    text-align:right;
+}
+
+.td-good {
+    color:#2E7D32;
+    font-weight:700;
+}
+
+.td-warn {
+    color:#B45309;
+    font-weight:700;
+}
+
+/* ── Date Picker ── */
+.date-input {
+    display:flex;
+    align-items:center;
+    gap:6px;
+    background:white;
+    border:1px solid rgba(80,184,184,0.2);
+    border-radius:6px;
+    padding:5px 10px;
+    font-size:12px;
+    color:#3D5A6A;
+    cursor:pointer;
+}
+
+.date-input:hover {
+    border-color:#50B8B8;
+}
+
+/* ── SVG Chart ── */
+svg text {
+    font-family:inherit;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+    width:6px;
+    height:6px;
+}
+
+::-webkit-scrollbar-track {
+    background:transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background:rgba(80,184,184,0.2);
+    border-radius:3px;
+}
+
+/* ── Animations ── */
+@keyframes fadeUp {
+    from {
+        opacity:0;
+        transform:translateY(12px);
+    }
+
+    to {
+        opacity:1;
+        transform:translateY(0);
+    }
+
+}
+
+.fade-up {
+    animation:fadeUp .45s ease both;
+}
+
+.fade-up:nth-child(1) {
+    animation-delay:.05s;
+}
+
+.fade-up:nth-child(2) {
+    animation-delay:.10s;
+}
+
+.fade-up:nth-child(3) {
+    animation-delay:.15s;
+}
+
+.fade-up:nth-child(4) {
+    animation-delay:.20s;
+}
+
+.fade-up:nth-child(5) {
+    animation-delay:.25s;
+}

@@ -3,12 +3,20 @@
   const D=AssetDomain, $=s=>document.querySelector(s);
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const menus={assets:'자산대장',maintenance:'점검과 정비',documents:'도면과 문서',masters:'기준정보',changes:'변경 이력'};
+  const menuIcons={
+    assets:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 12h8M8 17h5"/>',
+    maintenance:'<path d="M14.7 6.3a5 5 0 0 0-6.4 6.4L3 18l3 3 5.3-5.3a5 5 0 0 0 6.4-6.4l-3 3-3-3z"/>',
+    documents:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h6"/>',
+    masters:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 9v12"/>',
+    changes:'<path d="M3 12a9 9 0 1 0 3-6.7M3 3v6h6M12 7v5l3 2"/>'
+  };
   const kinds={assetSave:'자산 등록과 수정',install:'설치',detach:'해체',replace:'교체',dispose:'폐기',tagSave:'태그 변경',masterSave:'기준정보 변경',masterRemove:'기준정보 삭제 또는 비활성화',planSave:'점검 계획 변경',recordSave:'점검과 정비 기록',documentAdd:'문서 등록',linkAdd:'문서 연결',linkRemove:'연결 해제',documentRemove:'파일 삭제',import:'엑셀 등록',reset:'초기화',교체:'교체'};
   const S={data:null,menu:'assets',scope:'',search:'',location:'',classId:'',importance:'',status:'',sort:'no',page:1,pageSize:10,docSearch:'',planSearch:'',planFilter:'',changeSearch:'',changeKind:'',from:'',to:'',busy:false};
   let importRows=[],lastFocus,modalKind,detailId,detailTab='기본 정보';
   const find=(list,id)=>S.data[list].find(x=>x.id===id);
   const label=(type,id)=>{const x=find({asset:'assets',tag:'tags',process:'processes'}[type],id);return x?(x.no ? x.no+' / ' : '')+x.name:'알 수 없는 대상';};
   const button=(action,text,id='',cls='')=>`<button type="button" data-action="${action}" data-id="${esc(id)}" class="${cls}">${esc(text)}</button>`;
+  const masterAction=(action,title,id)=>`<button type="button" data-action="${action}" data-id="${esc(id)}" class="master-action${action==='master-remove'?' danger':''}" title="${title}" aria-label="${title}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${action==='master-edit'?'<path d="M16 3l5 5L8 21H3v-5zM14 5l5 5"/>':'<path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/>'}</svg></button>`;
   const options=(items,value,blank='선택 없음')=>`<option value="">${blank}</option>`+items.map(x=>`<option value="${esc(x.id)}" ${x.id===value?'selected':''}>${esc(x.no?x.no+' / '+x.name:x.name)}${x.active===false?' (비활성)':''}</option>`).join('');
   const select=(name,title,items,value='',blank='선택하십시오')=>`<label>${title}<select name="${name}">${options(items,value,blank)}</select></label>`;
   const field=(name,title,value='',type='text',required=false)=>`<label>${title}<input name="${name}" type="${type}" value="${esc(value)}" ${required?'required':''} ${type==='number'?'min="0" step="1"':''}></label>`;
@@ -70,7 +78,7 @@
   function render() {
     if(!S.data)return;
     $('#storage-status').textContent=(window.ASSET_STANDALONE_CLIENT?'단일 HTML':'Web')+' 저장소 연결 / 변경 '+S.data.revision;
-    $('#asset-nav').innerHTML=Object.entries(menus).map(([k,v])=>button('menu',v,k,k===S.menu?'active':'')).join('');
+    $('#asset-nav').innerHTML=Object.entries(menus).map(([k,v])=>`${k==='masters'?'<div class="lnb-divider" aria-hidden="true"></div>':''}<button type="button" data-action="menu" data-id="${k}" class="lnb-item${k===S.menu?' active':''}"${k===S.menu?' aria-current="page"':''}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${menuIcons[k]}</svg><span>${v}</span></button>`).join('');
     const s=S.data;
     $('#summary').innerHTML=[['전체 자산',s.assets.length],['가동 자산',s.assets.filter(a=>a.status==='가동').length],['빈 설비 태그',s.tags.filter(t=>t.active&&t.kind==='설비'&&!D.occupant(s,t.id)).length],['예비 자산',s.assets.filter(a=>a.status==='예비').length],['폐기 자산',s.assets.filter(a=>a.status==='폐기').length],['점검 기한 초과',s.plans.filter(overdue).length]].map(([k,v])=>`<div class="kpi"><span>${k}</span><strong>${v}</strong></div>`).join('');
     ({assets:renderAssets,maintenance:renderMaintenance,documents:renderDocuments,masters:renderMasters,changes:renderChanges})[S.menu]();
@@ -147,7 +155,7 @@
   function renderMasters() {
     $('#workspace').innerHTML=`<div class="card"><h3>기준정보와 태그 계층</h3><p class="section-note">사용 중인 기준정보는 삭제 대신 비활성화합니다. 기존 자산의 참조와 명칭을 유지하며 신규 선택에서는 제외합니다.</p>${['classes','manufacturers','managers','tags'].map(list=>{
       const titles={classes:'설비 분류',manufacturers:'제조사',managers:'관리 기관',tags:'태그 계층'};
-      return `<section class="master-block"><div class="master-heading"><h3>${titles[list]}</h3>${button('master-new','추가',list)}</div>${table(['코드 / 태그번호','명칭','추가 정보','사용 여부','처리'],S.data[list].map(x=>row([esc(x.no||x.id),esc(x.name),list==='tags'?esc(find('processes',x.processId)?.name)+' / '+esc(x.kind)+'<br>상위: '+esc(find('tags',x.parentId)?.no||'없음')+'<br>'+esc(x.drawing):list==='managers'?esc([x.department,x.person,x.contact].filter(Boolean).join(' / ')):list==='manufacturers'?esc(x.contact||'—'):esc(x.en),x.active?'활성':'비활성',button('master-edit','수정',list+':'+x.id)+(list==='tags'?'':button('master-remove','삭제 또는 비활성화',list+':'+x.id,'danger'))])))}</section>`;
+      return `<section class="master-block"><div class="master-heading"><h3>${titles[list]}</h3>${button('master-new','추가',list)}</div>${table(['처리','코드 / 태그번호','명칭','추가 정보','사용 여부'],S.data[list].map(x=>row([`<div class="master-actions">${masterAction('master-edit','수정',list+':'+x.id)}${list==='tags'?'':masterAction('master-remove','삭제 또는 비활성화',list+':'+x.id)}</div>`,esc(x.no||x.id),esc(x.name),list==='tags'?esc(find('processes',x.processId)?.name)+' / '+esc(x.kind)+'<br>상위: '+esc(find('tags',x.parentId)?.no||'없음')+'<br>'+esc(x.drawing):list==='managers'?esc([x.department,x.person,x.contact].filter(Boolean).join(' / ')):list==='manufacturers'?esc(x.contact||'—'):esc(x.en),x.active?'활성':'비활성'])))}</section>`;
     }).join('')}</div>`;
   }
   function masterForm(list,id='') {

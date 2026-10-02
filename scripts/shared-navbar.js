@@ -2,11 +2,31 @@
    PROMISE DT — Shared Top Dock Bar  (shared-navbar.js)
    ─────────────────────────────────────────────────────────────
    사용법:  <script src="shared-navbar.js"></script>
-           자동으로 #dock 삽입 + 시계 갱신 + 현재 페이지 활성 표시
+           공통 CSS와 navbar.css를 먼저 로드한 뒤 #dock 삽입 + 시계 갱신 + 현재 페이지 활성 표시
 ═══════════════════════════════════════════════════════════════ */
 
 (function () {
     'use strict';
+
+    // 캐시된 이전 HTML이 새 스크립트를 로드해도 외부 CSS를 누락하지 않습니다.
+    // 단일 HTML은 생성기가 CSS를 내장하므로 추가 요청이 필요하지 않습니다.
+    const pendingStyles = [];
+    const scriptSource = document.currentScript && document.currentScript.src;
+    if (scriptSource) {
+        ['common', 'navbar'].forEach(name => {
+            const href = new URL('../styles/' + name + '.css', scriptSource).href;
+            if (![...document.querySelectorAll('link[rel="stylesheet"]')].some(link => link.href === href)) {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = href;
+                pendingStyles.push(new Promise((resolve, reject) => {
+                    link.onload = resolve;
+                    link.onerror = () => reject(new Error('Stylesheet load failed: ' + href));
+                }));
+                document.head.appendChild(link);
+            }
+        });
+    }
 
     /* ── 메뉴 정의 ───────────────────────────────── */
     const MENUS = [
@@ -84,53 +104,6 @@
         </nav>`;
     }
 
-    /* ── CSS (공통 상단바 스타일) ──────────────────── */
-    function injectStyles() {
-        if (document.getElementById('shared-navbar-css')) return;
-        const style = document.createElement('style');
-        style.id = 'shared-navbar-css';
-        style.textContent = `
-        /* ── SHARED DOCK VARIABLES ── */
-        :root {
-            --c-green:#73CF79;--c-mint:#50B8B8;--c-blue:#3978B8;--c-navy:#1A202D;--c-teal:#5CC196;
-            --grad-main:linear-gradient(135deg,#73CF79 0%,#50B8B8 50%,#3978B8 100%);
-            --grad-h:linear-gradient(90deg,#73CF79 0%,#50B8B8 50%,#3978B8 100%);
-            --bg:#EBF3F5;--border:rgba(80,184,184,0.14);--border-strong:rgba(80,184,184,0.24);
-            --text-1:#1A202D;--text-2:#3D5A6A;--text-3:#7A9EAB;
-            --accent:#3978B8;--accent-mid:#50B8B8;--accent-lt:rgba(80,184,184,0.10);
-            --success:#73CF79;--warning:#F59E0B;--danger:#EF4444;
-            --dock-h:84px;
-        }
-
-        #dock{position:fixed;top:0;left:0;right:0;height:var(--dock-h);background:rgba(255,255,255,0.25);backdrop-filter:blur(22px);border-bottom:1px solid rgba(80,184,184,0.18);box-shadow:0 4px 24px rgba(0,0,0,0.09),0 0 0 1px rgba(0,0,0,0.04);display:flex;align-items:center;z-index:200;}
-        .dock-inner{display:flex;align-items:center;width:100%;padding:0 20px;gap:6px;}
-        .dock-spacer{flex:1;}
-        .dock-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
-        .dock-item{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:transform 0.18s cubic-bezier(0.34,1.56,0.64,1);padding:0 4px;}
-        .dock-item:hover{transform:translateY(9px);}
-        .dock-icon-wrap{width:58px;height:58px;border-radius:15px;background:rgba(220,226,230,0.9);display:flex;align-items:center;justify-content:center;color:var(--text-2);transition:all 0.18s;}
-        .dock-item.active .dock-icon-wrap{background:var(--grad-main);color:white;box-shadow:0 4px 16px rgba(62,135,194,0.38);}
-        .dock-item::before{content:attr(data-label);position:absolute;top:115%;left:50%;transform:translateX(-50%);background:rgba(80,184,184,0.95);color:white;font-size:14px;padding:6px 12px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 0.15s;z-index:300;}
-        .dock-item:hover::before{opacity:1;}
-        .dock-sep{width:2px;height:40px;background:var(--border-strong);margin:0 6px;}
-        .tb-sep{width:2px;height:40px;background:var(--border-strong);flex-shrink:0;}
-        .tb-clock{font-family:'Noto Sans KR',sans-serif;font-size:16px;font-weight:500;color:var(--text-2);letter-spacing:0.05em;white-space:nowrap;}
-        .tb-weather{font-size:15px;color:var(--text-2);background:rgba(0,0,0,0.04);padding:9px 22px;border-radius:100px;white-space:nowrap;flex-shrink:0;}
-        .icon-btn{position:relative;background:none;border:none;cursor:pointer;width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;transition:background 0.15s;}
-        .icon-btn:hover{background:rgba(0,0,0,0.06);}
-        .notif-dot{position:absolute;top:8px;right:8px;width:7px;height:7px;background:var(--danger);border-radius:50%;border:2px solid white;}
-        .avatar{width:44px;height:44px;border-radius:12px;background:var(--grad-main);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:white;cursor:pointer;flex-shrink:0;}
-        .dock-user{display:flex;align-items:center;gap:10px;padding:4px 14px 4px 4px;border-radius:14px;transition:background 0.15s;}
-        .dock-user:hover{background:rgba(0,0,0,0.04);}
-        .dock-user-info{display:flex;flex-direction:column;gap:1px;}
-        .dock-user-name{font-size:13px;font-weight:600;color:var(--text-1);line-height:1.2;white-space:nowrap;}
-        .dock-user-role{font-size:11px;font-weight:600;color:var(--c-mint);line-height:1.2;white-space:nowrap;}
-        .dock-runtime{font-size:15px;color:var(--text-2);background:rgba(0,0,0,0.04);padding:10px 28px;border-radius:100px;white-space:nowrap;flex-shrink:0;display:flex;align-items:center;letter-spacing:0.01em;margin-right:10px;}
-        #dock-slot{display:contents;}
-        `;
-        document.head.appendChild(style);
-    }
-
     /* ── 시계 ─────────────────────────────────────── */
     function startClock() {
         const el = document.getElementById('clock');
@@ -163,8 +136,14 @@
 
     /* ── 초기화 ───────────────────────────────────── */
     function init() {
-        injectStyles();
         document.body.insertAdjacentHTML('afterbegin', buildDockHTML());
+        if (pendingStyles.length) {
+            const dock = document.getElementById('dock');
+            dock.style.visibility = 'hidden';
+            Promise.all(pendingStyles).then(() => {
+                dock.style.removeProperty('visibility');
+            }).catch(error => console.error(error));
+        }
         startClock();
         bindNav();
         fitViewport();

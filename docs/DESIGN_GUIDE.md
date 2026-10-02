@@ -1,11 +1,21 @@
 # PROMISE DT Design Guidelines
 
+## CSS File Structure
+
+All pages load `styles/common.css`, `styles/components.css`, then `styles/pages/<page>.css`. Pages with the shared top menu load `styles/navbar.css` last, preserving the previous cascade order. Login omits the navbar stylesheet.
+
+`common.css` owns the brand tokens and shared viewport rules. Identical buttons, cards and left navigation rules are in `components.css`, scoped to `body.dashboard-page` with `:where()` so selector specificity stays unchanged. Login, main and asset retain their distinct components in dedicated stylesheets. Do not apply `dashboard-page` to those pages without an explicit design change.
+
+Page HTML must not contain style definition blocks. Keep static component definitions in CSS files. Existing element-level style attributes and JavaScript style changes remain for local overrides and live state. The shared navbar JavaScript manages navigation and the clock, with no CSS injection. The standalone generator embeds local stylesheet links and their local resources automatically. Use HTML links instead of CSS `@import`.
+
+See [`styles/README.md`](../styles/README.md) for loading examples and `npm run test:css` for regression comparison with the pre-extraction commit.
+
 ## Viewport & Layout
 
 - Fixed viewport: `1920 x 1080px` (16:9)
 - Scaling: `shared-navbar.js` applies `fitViewport()` which scales body via `transform: scale(s)` where `s = Math.min(innerWidth/1920, innerHeight/1080)`
 - Body CSS: `width:1920px; height:1080px; flex-shrink:0; overflow:hidden; transform-origin:center center; position:relative;`
-- HTML wrapper: `width:100vw; height:100vh; overflow:hidden; background:#000; display:flex; align-items:center; justify-content:center;`
+- HTML wrapper: `width:100vw; height:100vh; overflow:hidden; background:var(--bg); display:flex; align-items:center; justify-content:center;`
 - Dock height: `84px` (`--dock-h`). Page content starts below via `.page-shell { position:fixed; top:84px; left:0; right:0; bottom:0; }`
 
 ## Color System

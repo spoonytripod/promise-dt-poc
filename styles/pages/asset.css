@@ -1,0 +1,549 @@
+/* asset 페이지 전용 스타일 */
+/* 기존 자산 화면의 가상 요소 크기 계산을 유지합니다. */
+*::before, *::after {
+    box-sizing: content-box;
+}
+
+body {
+    margin:0;
+    background:#EBF3F5;
+    color:#1A202D;
+    font-size:14px
+}
+
+button,input,select,textarea {
+    font:inherit;
+    color:inherit
+}
+
+button {
+    border:1px solid rgba(80,184,184,.24);
+    background:white;
+    border-radius:8px;
+    padding:9px 14px;
+    cursor:pointer;
+    font-size:13px;
+    font-weight:600
+}
+
+button:hover {
+    border-color:#3978B8;
+    color:#3978B8
+}
+
+button:disabled {
+    opacity:.45;
+    cursor:default
+}
+
+.primary {
+    background:linear-gradient(135deg,#50B8B8,#3978B8);
+    color:#fff;
+    border-color:transparent
+}
+
+.danger {
+    color:#b42318
+}
+
+input,select,textarea {
+    border:1px solid #cbdde2;
+    background:white;
+    border-radius:8px;
+    padding:10px;
+    min-width:0
+}
+
+input:focus,select:focus,textarea:focus,button:focus-visible {
+    outline:2px solid #50B8B8;
+    outline-offset:2px
+}
+
+textarea {
+    min-height:80px;
+    resize:vertical
+}
+
+h1,h2,h3,p {
+    margin:0
+}
+
+h1 {
+    font-size:22px;
+    font-weight:800;
+    background:linear-gradient(90deg,#73CF79,#50B8B8,#3978B8);
+    background-clip:text;
+    color:transparent
+}
+
+h2 {
+    font-size:20px
+}
+
+h3 {
+    font-size:15px;
+    margin:0 0 14px
+}
+
+p {
+    line-height:1.7;
+    color:#7A9EAB
+}
+
+small,.muted {
+    color:#7A9EAB;
+    font-size:12px
+}
+
+.page-shell {
+    position:absolute;
+    top:84px;
+    left:0;
+    right:0;
+    bottom:0;
+    display:flex
+}
+
+/* 메뉴의 배치와 선택 표시는 components.css의 공통 LNB 규칙을 사용합니다. */
+:where(.asset-page) button.lnb-item {
+    width:100%;
+    border:0;
+    border-radius:0;
+    background:transparent;
+    text-align:left;
+    font-weight:400;
+}
+
+.asset-sidebar-tools {
+    padding:0 18px;
+}
+
+.side-note {
+    margin:28px 6px 24px
+}
+
+.side-note strong {
+    font-size:13px;
+    color:#3978B8
+}
+
+.side-note p {
+    font-size:12px;
+    margin-top:12px
+}
+
+.asset-sidebar-tools>button {
+    width:100%;
+    margin-top:12px
+}
+
+.actor-label {
+    display:grid;
+    font-size:12px;
+    gap:7px;
+    margin-bottom:6px
+}
+
+.actor-label input {
+    width:100%
+}
+
+main {
+    flex:1;
+    min-width:0;
+    overflow:auto;
+    padding:24px 32px 40px
+}
+
+header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:18px;
+    margin-bottom:22px
+}
+
+header p {
+    font-size:13px;
+    margin-top:4px
+}
+
+#storage-status {
+    font-size:12px;
+    color:#3978B8;
+    background:#fff;
+    padding:9px 14px;
+    border-radius:20px
+}
+
+.kpis {
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:14px;
+    margin-bottom:22px
+}
+
+.kpi {
+    background:white;
+    border:1px solid rgba(80,184,184,.1);
+    padding:17px 20px;
+    border-radius:14px
+}
+
+.kpi span {
+    display:block;
+    color:#7A9EAB;
+    font-size:12px
+}
+
+.kpi strong {
+    display:block;
+    font-size:28px;
+    margin-top:7px
+}
+
+.card {
+    background:white;
+    border-radius:14px;
+    border:1px solid rgba(80,184,184,.14);
+    padding:20px;
+    min-width:0
+}
+
+.toolbar {
+    display:flex;
+    gap:8px;
+    align-items:center;
+    flex-wrap:wrap;
+    margin-bottom:16px
+}
+
+.toolbar input {
+    flex:1;
+    min-width:220px
+}
+
+.toolbar select {
+    max-width:220px
+}
+
+.layout {
+    display:grid;
+    grid-template-columns:245px minmax(0,1fr);
+    gap:16px
+}
+
+.tree {
+    max-height:650px;
+    overflow:auto
+}
+
+.tree button {
+    display:block;
+    width:100%;
+    border-color:transparent;
+    text-align:left;
+    margin-bottom:4px;
+    font-weight:400;
+    overflow-wrap:anywhere
+}
+
+.tree button.active {
+    background:#edf7f7;
+    color:#3978B8
+}
+
+.tree .process {
+    font-weight:700
+}
+
+.tree .tag {
+    font-size:12px
+}
+
+.scroll-table {
+    max-height:575px;
+    overflow:auto;
+    border:1px solid #e6eff2;
+    border-radius:10px
+}
+
+table {
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px
+}
+
+th {
+    position:sticky;
+    top:0;
+    background:#f5fafb;
+    color:#7A9EAB;
+    font-size:12px;
+    text-align:left;
+    z-index:1
+}
+
+th,td {
+    padding:12px 14px;
+    border-bottom:1px solid #edf2f4;
+    vertical-align:top
+}
+
+td {
+    color:#3D5A6A;
+    overflow-wrap:anywhere;
+    max-width:350px
+}
+
+td button {
+    padding:5px 9px;
+    font-size:12px;
+    margin:0 3px 4px 0
+}
+
+tbody tr:hover {
+    background:#f8fbfc
+}
+
+.badge {
+    display:inline-block;
+    border-radius:100px;
+    padding:3px 10px;
+    font-size:11px;
+    background:#edf5f6;
+    white-space:nowrap
+}
+
+.badge.ok {
+    background:#eff8ef;
+    color:#2E7D32
+}
+
+.badge.warn {
+    background:#fff6e5;
+    color:#ac6700
+}
+
+.badge.dead {
+    background:#fef0ee;
+    color:#b42318
+}
+
+.pager {
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    gap:12px;
+    margin-top:15px
+}
+
+.empty {
+    text-align:center;
+    padding:35px;
+    color:#7A9EAB
+}
+
+.tag-info {
+    padding:14px;
+    background:#f4fafb;
+    border-radius:10px;
+    margin-bottom:15px;
+    line-height:1.8
+}
+
+.modal {
+    position:absolute;
+    inset:84px 0 0;
+    background:rgba(235,243,245,.92);
+    z-index:100;
+    display:flex;
+    align-items:center;
+    justify-content:center
+}
+
+.modal[hidden] {
+    display:none
+}
+
+.modal-card {
+    background:white;
+    width:1120px;
+    max-height:930px;
+    overflow:auto;
+    padding:26px;
+    border-radius:20px;
+    box-shadow:0 16px 54px rgba(0,0,0,.14)
+}
+
+.modal-card header {
+    position:sticky;
+    top:-26px;
+    background:white;
+    padding:12px 0;
+    z-index:3
+}
+
+.form-grid {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px
+}
+
+.form-grid label {
+    display:grid;
+    gap:6px;
+    font-size:12px;
+    color:#3D5A6A
+}
+
+.form-grid label.wide {
+    grid-column:1/-1
+}
+
+.form-grid input,.form-grid select,.form-grid textarea {
+    width:100%
+}
+
+.form-grid .help {
+    grid-column:1/-1;
+    padding:12px;
+    background:#f5fafb;
+    color:#7A9EAB;
+    font-size:12px;
+    line-height:1.7
+}
+
+.actions {
+    display:flex;
+    gap:8px;
+    justify-content:flex-end;
+    margin-top:22px
+}
+
+.form-error {
+    color:#b42318;
+    background:#fff3f0;
+    padding:12px;
+    border-radius:8px;
+    margin-top:14px;
+    white-space:pre-wrap
+}
+
+.form-error:empty {
+    display:none
+}
+
+.details {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px
+}
+
+.detail-value {
+    background:#f6fafb;
+    border-radius:8px;
+    padding:12px;
+    overflow-wrap:anywhere
+}
+
+.detail-value span {
+    display:block;
+    font-size:12px;
+    color:#7A9EAB;
+    margin-bottom:5px
+}
+
+.tabs {
+    display:flex;
+    gap:7px;
+    flex-wrap:wrap;
+    margin:14px 0 18px
+}
+
+.tabs .active {
+    background:#edf7f7;
+    color:#3978B8
+}
+
+.doc-name {
+    max-width:350px;
+    overflow-wrap:anywhere
+}
+
+.change-values {
+    white-space:pre-wrap;
+    font-size:12px;
+    max-height:280px;
+    overflow:auto;
+    word-break:break-word;
+    background:#f7fbfc;
+    padding:12px;
+    border-radius:8px
+}
+
+#notice {
+    margin-bottom:16px;
+    background:#e9f8ee;
+    padding:12px 16px;
+    border-radius:10px;
+    color:#27653a
+}
+
+#notice.error {
+    color:#b42318;
+    background:#fff0ed
+}
+
+#notice[hidden] {
+    display:none
+}
+
+.preview {
+    max-height:350px;
+    overflow:auto;
+    margin-top:16px
+}
+
+.section-note {
+    font-size:12px;
+    color:#7A9EAB;
+    margin:0 0 15px
+}
+
+.master-heading {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:16px
+}
+
+.master-block {
+    margin-top:22px
+}
+
+/* 기준정보 테이블의 공통 처리 열 */
+.master-block th:first-child,
+.master-block td:first-child {
+    width:104px;
+    white-space:nowrap;
+}
+
+.master-actions {
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+}
+
+.master-action {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:32px;
+    height:32px;
+    padding:0;
+}
+
+.master-action svg {
+    flex-shrink:0;
+}

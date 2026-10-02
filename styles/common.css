@@ -1,0 +1,47 @@
+/* 모든 페이지의 디자인 토큰과 동일한 기본 화면 규격 */
+:root  {
+    --c-green:#73CF79;
+    --c-mint:#50B8B8;
+    --c-blue:#3978B8;
+    --c-navy:#1A202D;
+    --c-teal:#5CC196;
+    --grad-main:linear-gradient(135deg,#73CF79 0%,#50B8B8 50%,#3978B8 100%);
+    --grad-h:linear-gradient(90deg,#73CF79 0%,#50B8B8 50%,#3978B8 100%);
+    --bg:#EBF3F5;
+    --border:rgba(80,184,184,0.14);
+    --border-strong:rgba(80,184,184,0.24);
+    --text-1:#1A202D;
+    --text-2:#3D5A6A;
+    --text-3:#7A9EAB;
+    --accent:#3978B8;
+    --accent-mid:#50B8B8;
+    --accent-lt:rgba(80,184,184,0.10);
+    --success:#73CF79;
+    --warning:#F59E0B;
+    --danger:#EF4444;
+    --dock-h:84px;
+}
+
+*, *::before, *::after  {
+    box-sizing: border-box;
+}
+
+html  {
+    background:var(--bg);
+    width:100vw;
+    height:100vh;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+body  {
+    width:1920px;
+    height:1080px;
+    flex-shrink:0;
+    overflow:hidden;
+    font-family:'Noto Sans KR',sans-serif;
+    transform-origin:center center;
+    position:relative;
+}

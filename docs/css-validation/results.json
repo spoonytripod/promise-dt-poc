@@ -1,0 +1,1026 @@
+[
+  {
+    "browser": "Chrome",
+    "page": "login.html",
+    "mode": "web",
+    "result": "PASS",
+    "elements": 92,
+    "computedStyleDifferences": 0,
+    "baseline": "c128706"
+  },
+  {
+    "browser": "Chrome",
+    "page": "main.html",
+    "mode": "web",
+    "result": "PASS",
+    "elements": 399,
+    "computedStyleDifferences": 0,
+    "baseline": "c128706"
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-analysis.html",
+    "mode": "web",
+    "result": "PASS",
+    "elements": 571,
+    "computedStyleDifferences": 0,
+    "baseline": "c128706"
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-asset.html",
+    "mode": "web",
+    "result": "PASS",
+    "elements": 277,
+    "computedStyleDifferences": 0,
+    "baseline": "c128706"
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-decision.html",
+    "mode": "web",
+    "result": "PASS",
+    "elements": 228,
+    "computedStyleDifferences": 0,
+    "baseline": "c128706"
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-diagnostics.html",
+    "mode": "web",
+    "result": "PASS",
+    "elements": 273,
+    "computedStyleDifferences": 0,
+    "baseline": "c128706"
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-energy.html",
+    "mode": "web",
+    "result": "PASS",
+    "elements": 473,
+    "computedStyleDifferences": 0,
+    "baseline": "c128706"
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-operation.html",
+    "mode": "web",
+    "result": "PASS",
+    "elements": 880,
+    "computedStyleDifferences": 0,
+    "baseline": "c128706"
+  },
+  {
+    "browser": "Chrome",
+    "page": "login.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1600,
+      "height": 900
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": null,
+    "count": 0,
+    "contained": true
+  },
+  {
+    "browser": "Chrome",
+    "page": "main.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1600,
+      "height": 900
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-analysis.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1600,
+      "height": 900
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-asset.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1600,
+      "height": 900
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-decision.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1600,
+      "height": 900
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-diagnostics.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1600,
+      "height": 900
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-energy.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1600,
+      "height": 900
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-operation.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1600,
+      "height": 900
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Chrome",
+    "page": "login.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": null,
+    "count": 0,
+    "contained": true
+  },
+  {
+    "browser": "Chrome",
+    "page": "main.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-analysis.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-asset.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-decision.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-diagnostics.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-energy.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-operation.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Chrome",
+    "page": "login.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 2048,
+      "height": 983
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": null,
+    "count": 0,
+    "contained": true
+  },
+  {
+    "browser": "Chrome",
+    "page": "main.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 2048,
+      "height": 983
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-analysis.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 2048,
+      "height": 983
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-asset.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 2048,
+      "height": 983
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-decision.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 2048,
+      "height": 983
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-diagnostics.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 2048,
+      "height": 983
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-energy.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 2048,
+      "height": 983
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-operation.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 2048,
+      "height": 983
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-operation.html",
+    "mode": "cached-html",
+    "result": "PASS"
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-analysis.html",
+    "mode": "cached-html",
+    "result": "PASS"
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-decision.html",
+    "mode": "cached-html",
+    "result": "PASS"
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-diagnostics.html",
+    "mode": "cached-html",
+    "result": "PASS"
+  },
+  {
+    "browser": "Chrome",
+    "page": "login.html",
+    "mode": "file",
+    "result": "PASS",
+    "localLinks": 0,
+    "width": "1920px",
+    "styles": 5,
+    "dock": null
+  },
+  {
+    "browser": "Chrome",
+    "page": "main.html",
+    "mode": "file",
+    "result": "PASS",
+    "localLinks": 0,
+    "width": "1920px",
+    "styles": 6,
+    "dock": "84px"
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-analysis.html",
+    "mode": "file",
+    "result": "PASS",
+    "localLinks": 0,
+    "width": "1920px",
+    "styles": 6,
+    "dock": "84px"
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-asset.html",
+    "mode": "file",
+    "result": "PASS",
+    "localLinks": 0,
+    "width": "1920px",
+    "styles": 6,
+    "dock": "84px"
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-decision.html",
+    "mode": "file",
+    "result": "PASS",
+    "localLinks": 0,
+    "width": "1920px",
+    "styles": 6,
+    "dock": "84px"
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-diagnostics.html",
+    "mode": "file",
+    "result": "PASS",
+    "localLinks": 0,
+    "width": "1920px",
+    "styles": 6,
+    "dock": "84px"
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-energy.html",
+    "mode": "file",
+    "result": "PASS",
+    "localLinks": 0,
+    "width": "1920px",
+    "styles": 6,
+    "dock": "84px"
+  },
+  {
+    "browser": "Chrome",
+    "page": "page-operation.html",
+    "mode": "file",
+    "result": "PASS",
+    "localLinks": 0,
+    "width": "1920px",
+    "styles": 6,
+    "dock": "84px"
+  },
+  {
+    "browser": "Edge",
+    "page": "login.html",
+    "mode": "web",
+    "result": "PASS",
+    "elements": 92,
+    "computedStyleDifferences": 0,
+    "baseline": "c128706"
+  },
+  {
+    "browser": "Edge",
+    "page": "main.html",
+    "mode": "web",
+    "result": "PASS",
+    "elements": 399,
+    "computedStyleDifferences": 0,
+    "baseline": "c128706"
+  },
+  {
+    "browser": "Edge",
+    "page": "page-analysis.html",
+    "mode": "web",
+    "result": "PASS",
+    "elements": 571,
+    "computedStyleDifferences": 0,
+    "baseline": "c128706"
+  },
+  {
+    "browser": "Edge",
+    "page": "page-asset.html",
+    "mode": "web",
+    "result": "PASS",
+    "elements": 277,
+    "computedStyleDifferences": 0,
+    "baseline": "c128706"
+  },
+  {
+    "browser": "Edge",
+    "page": "page-decision.html",
+    "mode": "web",
+    "result": "PASS",
+    "elements": 228,
+    "computedStyleDifferences": 0,
+    "baseline": "c128706"
+  },
+  {
+    "browser": "Edge",
+    "page": "page-diagnostics.html",
+    "mode": "web",
+    "result": "PASS",
+    "elements": 273,
+    "computedStyleDifferences": 0,
+    "baseline": "c128706"
+  },
+  {
+    "browser": "Edge",
+    "page": "page-energy.html",
+    "mode": "web",
+    "result": "PASS",
+    "elements": 473,
+    "computedStyleDifferences": 0,
+    "baseline": "c128706"
+  },
+  {
+    "browser": "Edge",
+    "page": "page-operation.html",
+    "mode": "web",
+    "result": "PASS",
+    "elements": 880,
+    "computedStyleDifferences": 0,
+    "baseline": "c128706"
+  },
+  {
+    "browser": "Edge",
+    "page": "login.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1600,
+      "height": 900
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": null,
+    "count": 0,
+    "contained": true
+  },
+  {
+    "browser": "Edge",
+    "page": "main.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1600,
+      "height": 900
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Edge",
+    "page": "page-analysis.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1600,
+      "height": 900
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Edge",
+    "page": "page-asset.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1600,
+      "height": 900
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Edge",
+    "page": "page-decision.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1600,
+      "height": 900
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Edge",
+    "page": "page-diagnostics.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1600,
+      "height": 900
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Edge",
+    "page": "page-energy.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1600,
+      "height": 900
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Edge",
+    "page": "page-operation.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1600,
+      "height": 900
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Edge",
+    "page": "login.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": null,
+    "count": 0,
+    "contained": true
+  },
+  {
+    "browser": "Edge",
+    "page": "main.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Edge",
+    "page": "page-analysis.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Edge",
+    "page": "page-asset.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Edge",
+    "page": "page-decision.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Edge",
+    "page": "page-diagnostics.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Edge",
+    "page": "page-energy.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Edge",
+    "page": "page-operation.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Edge",
+    "page": "login.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 2048,
+      "height": 983
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": null,
+    "count": 0,
+    "contained": true
+  },
+  {
+    "browser": "Edge",
+    "page": "main.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 2048,
+      "height": 983
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Edge",
+    "page": "page-analysis.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 2048,
+      "height": 983
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Edge",
+    "page": "page-asset.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 2048,
+      "height": 983
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Edge",
+    "page": "page-decision.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 2048,
+      "height": 983
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Edge",
+    "page": "page-diagnostics.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 2048,
+      "height": 983
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Edge",
+    "page": "page-energy.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 2048,
+      "height": 983
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Edge",
+    "page": "page-operation.html",
+    "mode": "viewport",
+    "viewport": {
+      "width": 2048,
+      "height": 983
+    },
+    "result": "PASS",
+    "background": "rgb(235, 243, 245)",
+    "display": "flex",
+    "count": 9,
+    "contained": true
+  },
+  {
+    "browser": "Edge",
+    "page": "page-operation.html",
+    "mode": "cached-html",
+    "result": "PASS"
+  },
+  {
+    "browser": "Edge",
+    "page": "page-analysis.html",
+    "mode": "cached-html",
+    "result": "PASS"
+  },
+  {
+    "browser": "Edge",
+    "page": "page-decision.html",
+    "mode": "cached-html",
+    "result": "PASS"
+  },
+  {
+    "browser": "Edge",
+    "page": "page-diagnostics.html",
+    "mode": "cached-html",
+    "result": "PASS"
+  },
+  {
+    "browser": "Edge",
+    "page": "login.html",
+    "mode": "file",
+    "result": "PASS",
+    "localLinks": 0,
+    "width": "1920px",
+    "styles": 5,
+    "dock": null
+  },
+  {
+    "browser": "Edge",
+    "page": "main.html",
+    "mode": "file",
+    "result": "PASS",
+    "localLinks": 0,
+    "width": "1920px",
+    "styles": 6,
+    "dock": "84px"
+  },
+  {
+    "browser": "Edge",
+    "page": "page-analysis.html",
+    "mode": "file",
+    "result": "PASS",
+    "localLinks": 0,
+    "width": "1920px",
+    "styles": 6,
+    "dock": "84px"
+  },
+  {
+    "browser": "Edge",
+    "page": "page-asset.html",
+    "mode": "file",
+    "result": "PASS",
+    "localLinks": 0,
+    "width": "1920px",
+    "styles": 6,
+    "dock": "84px"
+  },
+  {
+    "browser": "Edge",
+    "page": "page-decision.html",
+    "mode": "file",
+    "result": "PASS",
+    "localLinks": 0,
+    "width": "1920px",
+    "styles": 6,
+    "dock": "84px"
+  },
+  {
+    "browser": "Edge",
+    "page": "page-diagnostics.html",
+    "mode": "file",
+    "result": "PASS",
+    "localLinks": 0,
+    "width": "1920px",
+    "styles": 6,
+    "dock": "84px"
+  },
+  {
+    "browser": "Edge",
+    "page": "page-energy.html",
+    "mode": "file",
+    "result": "PASS",
+    "localLinks": 0,
+    "width": "1920px",
+    "styles": 6,
+    "dock": "84px"
+  },
+  {
+    "browser": "Edge",
+    "page": "page-operation.html",
+    "mode": "file",
+    "result": "PASS",
+    "localLinks": 0,
+    "width": "1920px",
+    "styles": 6,
+    "dock": "84px"
+  }
+]

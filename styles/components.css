@@ -1,0 +1,153 @@
+/* 업무 페이지의 공통 컴포넌트. 좌측 메뉴는 자산 관리에서도 사용합니다. :where는 기존 선택자 우선순위를 유지합니다. */
+:where(.dashboard-page) .page-shell {
+    position:fixed;
+    top:84px;
+    left:0;
+    right:0;
+    bottom:0;
+    display:flex;
+    overflow:hidden;
+}
+
+:where(.dashboard-page, .asset-page) .lnb {
+    width:230px;
+    background:rgba(255,255,255,0.92);
+    backdrop-filter:blur(14px);
+    border-right:1px solid rgba(80,184,184,0.16);
+    padding:20px 0;
+    overflow-y:auto;
+    flex-shrink:0;
+}
+
+:where(.dashboard-page, .asset-page) .lnb-title {
+    font-size:9.5px;
+    font-weight:700;
+    letter-spacing:1.8px;
+    text-transform:uppercase;
+    color:#A8C4CE;
+    padding:6px 22px 8px;
+}
+
+:where(.dashboard-page, .asset-page) .lnb-item {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 22px;
+    font-size:13.5px;
+    color:#3D5A6A;
+    cursor:pointer;
+    transition:all 0.12s;
+    position:relative;
+}
+
+:where(.dashboard-page, .asset-page) .lnb-item:hover {
+    background:rgba(80,184,184,0.06);
+    color:#50B8B8;
+}
+
+:where(.dashboard-page, .asset-page) .lnb-item.active {
+    background:rgba(80,184,184,0.08);
+    color:#50B8B8;
+    font-weight:600;
+}
+
+:where(.dashboard-page, .asset-page) .lnb-item.active::before {
+    content:'';
+    position:absolute;
+    left:0;
+    top:6px;
+    bottom:6px;
+    width:3px;
+    border-radius:0 3px 3px 0;
+    background:linear-gradient(180deg,#73CF79,#3978B8);
+}
+
+:where(.dashboard-page, .asset-page) .lnb-item svg {
+    flex-shrink:0;
+}
+
+:where(.dashboard-page, .asset-page) .lnb-divider {
+    height:1px;
+    background:rgba(80,184,184,0.1);
+    margin:8px 18px;
+}
+
+:where(.dashboard-page) .page-hdr {
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    margin-bottom:22px;
+}
+
+:where(.dashboard-page) .page-hdr-sub {
+    font-size:13px;
+    color:#7A9EAB;
+    margin-top:2px;
+}
+
+:where(.dashboard-page) .btn {
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:8px 16px;
+    border-radius:8px;
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    border:1px solid rgba(80,184,184,0.2);
+    background:white;
+    color:#3D5A6A;
+    transition:all 0.15s;
+}
+
+:where(.dashboard-page) .btn:hover {
+    border-color:#50B8B8;
+    color:#50B8B8;
+}
+
+:where(.dashboard-page) .btn-primary {
+    background:linear-gradient(135deg,#50B8B8,#3978B8);
+    color:white;
+    border-color:transparent;
+}
+
+:where(.dashboard-page) .card {
+    background:white;
+    border-radius:14px;
+    border:1px solid rgba(80,184,184,0.1);
+    overflow:hidden;
+    transition:box-shadow 0.2s;
+}
+
+:where(.dashboard-page) .card:hover {
+    box-shadow:0 4px 20px rgba(0,0,0,0.06);
+}
+
+:where(.dashboard-page) .card-hdr {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:14px 20px;
+    border-bottom:1px solid rgba(0,0,0,0.04);
+}
+
+:where(.dashboard-page) .card-sub {
+    font-size:11px;
+    color:#7A9EAB;
+    margin-top:1px;
+}
+
+:where(.dashboard-page) .card-body {
+    padding:18px 20px;
+}
+
+:where(.dashboard-page) .section-tag {
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-size:11.5px;
+    font-weight:700;
+    color:#7A9EAB;
+    margin-bottom:10px;
+    letter-spacing:0.3px;
+}
