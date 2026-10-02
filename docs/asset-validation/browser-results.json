@@ -1,0 +1,30 @@
+[
+  {
+    "browser": "Chrome",
+    "mode": "web",
+    "result": "PASS",
+    "features": "AM-01~18 주요 화면 및 저장 시나리오, xlsx, Blob 다운로드, 재실행, 초기화, 자산과 진단 메뉴 왕복",
+    "errors": []
+  },
+  {
+    "browser": "Chrome",
+    "mode": "file",
+    "result": "PASS",
+    "features": "AM-01~18 주요 화면 및 저장 시나리오, xlsx, Blob 다운로드, 재실행, 초기화, 자산과 진단 메뉴 왕복",
+    "errors": []
+  },
+  {
+    "browser": "Edge",
+    "mode": "web",
+    "result": "PASS",
+    "features": "AM-01~18 주요 화면 및 저장 시나리오, xlsx, Blob 다운로드, 재실행, 초기화, 자산과 진단 메뉴 왕복",
+    "errors": []
+  },
+  {
+    "browser": "Edge",
+    "mode": "file",
+    "result": "PASS",
+    "features": "AM-01~18 주요 화면 및 저장 시나리오, xlsx, Blob 다운로드, 재실행, 초기화, 자산과 진단 메뉴 왕복",
+    "errors": []
+  }
+]

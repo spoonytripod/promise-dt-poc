@@ -7,3 +7,8 @@ demo_standalone.html
 # 대용량 3D 모델 (GitHub 100MB 제한 초과)
 models/concept.glb
 models/seperated.glb
+
+# 로컬 검증 의존성
+node_modules/
+asset-storage-probe.html
+__pycache__/

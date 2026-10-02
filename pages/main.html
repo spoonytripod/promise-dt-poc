@@ -2844,10 +2844,13 @@
         function closeMainNotice() {
             document.getElementById('main-notice').classList.add('hidden');
             if (document.getElementById('notice-dismiss').checked) {
-                localStorage.setItem('main-notice-dismissed', 'true');
+                // 로컬 단일 HTML의 Blob iframe에서는 localStorage 접근이 차단될 수 있음
+                try { localStorage.setItem('main-notice-dismissed', 'true'); } catch (error) { /* 안내 닫기는 현재 화면에서 유지 */ }
             }
         }
-        if (localStorage.getItem('main-notice-dismissed') === 'true') {
+        let noticeDismissed = false;
+        try { noticeDismissed = localStorage.getItem('main-notice-dismissed') === 'true'; } catch (error) { /* 저장 접근 불가 시 안내 표시 */ }
+        if (noticeDismissed) {
             document.getElementById('main-notice').classList.add('hidden');
         }
     </script>

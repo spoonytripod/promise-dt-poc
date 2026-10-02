@@ -1,279 +1,36 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=1920">
-    <title>설계 정보·자산 관리 — PROMISE DT</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
-        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-        html{width:100vw;height:100vh;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center;}
-        body{width:1920px;height:1080px;flex-shrink:0;overflow:hidden;background:#EBF3F5;font-family:'Noto Sans KR',sans-serif;color:#1A202D;-webkit-font-smoothing:antialiased;transform-origin:center center;position:relative;}
-
-        .page-shell{position:fixed;top:84px;left:0;right:0;bottom:0;display:flex;overflow:hidden;}
-        .lnb{width:230px;background:rgba(255,255,255,0.92);backdrop-filter:blur(14px);border-right:1px solid rgba(80,184,184,0.16);padding:20px 0;overflow-y:auto;flex-shrink:0;}
-        .lnb-title{font-size:9.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:#A8C4CE;padding:6px 22px 8px;}
-        .lnb-item{display:flex;align-items:center;gap:10px;padding:10px 22px;font-size:13.5px;color:#3D5A6A;cursor:pointer;transition:all 0.12s;position:relative;}
-        .lnb-item:hover{background:rgba(80,184,184,0.06);color:#50B8B8;}
-        .lnb-item.active{background:rgba(80,184,184,0.08);color:#50B8B8;font-weight:600;}
-        .lnb-item.active::before{content:'';position:absolute;left:0;top:6px;bottom:6px;width:3px;border-radius:0 3px 3px 0;background:linear-gradient(180deg,#73CF79,#3978B8);}
-        .lnb-item svg{flex-shrink:0;}
-        .lnb-divider{height:1px;background:rgba(80,184,184,0.1);margin:8px 18px;}
-
-        .main-content{flex:1;overflow-y:auto;padding:24px 32px 40px;}
-        .page-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;}
-        .page-hdr h1{font-size:22px;font-weight:800;background:linear-gradient(90deg,#73CF79,#50B8B8,#3978B8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-        .page-hdr-sub{font-size:13px;color:#7A9EAB;margin-top:2px;}
-
-        .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid rgba(80,184,184,0.2);background:white;color:#3D5A6A;transition:all 0.15s;}
-        .btn:hover{border-color:#50B8B8;color:#50B8B8;}
-        .btn-primary{background:linear-gradient(135deg,#50B8B8,#3978B8);color:white;border-color:transparent;}
-
-        .card{background:white;border-radius:14px;border:1px solid rgba(80,184,184,0.1);overflow:hidden;transition:box-shadow 0.2s;}
-        .card:hover{box-shadow:0 4px 20px rgba(0,0,0,0.06);}
-        .card-hdr{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid rgba(0,0,0,0.04);}
-        .card-title{font-size:13.5px;font-weight:700;}
-        .card-sub{font-size:11px;color:#7A9EAB;margin-top:1px;}
-        .card-body{padding:18px 20px;}
-
-        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;}
-        .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:18px;}
-        .section-tag{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;color:#7A9EAB;margin-bottom:10px;letter-spacing:0.3px;}
-
-        /* KPI */
-        .kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
-        .kpi-card{background:white;border-radius:14px;padding:18px 20px;border:1px solid rgba(80,184,184,0.1);transition:all 0.2s;position:relative;overflow:hidden;}
-        .kpi-card:hover{box-shadow:0 6px 24px rgba(80,184,184,0.12);transform:translateY(-2px);}
-        .kpi-card.hl::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#73CF79,#50B8B8,#3978B8);}
-        .kpi-label{font-size:11.5px;font-weight:600;color:#7A9EAB;margin-bottom:8px;}
-        .kpi-val{font-size:30px;font-weight:800;color:#1A202D;font-variant-numeric:tabular-nums;line-height:1;}
-        .kpi-unit{font-size:13px;font-weight:500;color:#7A9EAB;margin-left:3px;}
-        .kpi-meta{display:flex;justify-content:space-between;margin-top:10px;font-size:11px;color:#A8C4CE;}
-
-        /* Search bar */
-        .search-bar{display:flex;gap:8px;margin-bottom:18px;}
-        .search-input{flex:1;border:1px solid rgba(80,184,184,0.2);border-radius:10px;padding:10px 16px;font-size:13px;font-family:inherit;outline:none;background:white;transition:border-color 0.15s;}
-        .search-input:focus{border-color:#50B8B8;box-shadow:0 0 0 3px rgba(80,184,184,0.1);}
-        .filter-btn{padding:10px 16px;border-radius:10px;border:1px solid rgba(80,184,184,0.2);background:white;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:#3D5A6A;transition:all 0.15s;}
-        .filter-btn:hover{border-color:#50B8B8;color:#50B8B8;}
-
-        /* Asset table */
-        .data-tbl{width:100%;border-collapse:collapse;font-size:12.5px;}
-        .data-tbl th{text-align:left;font-size:10.5px;font-weight:700;color:#7A9EAB;letter-spacing:0.5px;text-transform:uppercase;padding:10px 14px;border-bottom:2px solid rgba(80,184,184,0.12);background:rgba(80,184,184,0.03);}
-        .data-tbl td{padding:11px 14px;border-bottom:1px solid rgba(0,0,0,0.04);color:#3D5A6A;font-variant-numeric:tabular-nums;}
-        .data-tbl tr:hover{background:rgba(80,184,184,0.03);}
-        .data-tbl tr{cursor:pointer;transition:background 0.1s;}
-        .td-num{text-align:right;font-weight:600;}
-        .status-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;}
-        .status-badge.ok{background:rgba(115,207,121,0.1);color:#2E7D32;}
-        .status-badge.warn{background:rgba(245,158,11,0.1);color:#D97706;}
-        .status-badge.crit{background:rgba(239,68,68,0.08);color:#DC2626;}
-        .status-badge.idle{background:rgba(80,184,184,0.06);color:#7A9EAB;}
-        .status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;}
-        .status-dot.ok{background:#73CF79;}.status-dot.warn{background:#F59E0B;}.status-dot.crit{background:#EF4444;}.status-dot.idle{background:#A8C4CE;}
-
-        /* Asset detail card */
-        .asset-detail{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
-        .detail-item{padding:14px;border-radius:10px;background:rgba(80,184,184,0.03);border:1px solid rgba(80,184,184,0.08);}
-        .detail-label{font-size:10.5px;color:#7A9EAB;font-weight:600;margin-bottom:4px;}
-        .detail-val{font-size:15px;font-weight:700;color:#1A202D;}
-
-        /* Doc list */
-        .doc-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.04);cursor:pointer;transition:all 0.1s;}
-        .doc-item:hover{background:rgba(80,184,184,0.03);margin:0 -12px;padding:10px 12px;border-radius:8px;}
-        .doc-item:last-child{border-bottom:none;}
-        .doc-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:800;}
-        .doc-icon.pdf{background:rgba(239,68,68,0.08);color:#DC2626;}
-        .doc-icon.dwg{background:rgba(57,120,184,0.08);color:#3978B8;}
-        .doc-icon.xls{background:rgba(115,207,121,0.08);color:#2E7D32;}
-        .doc-name{font-size:13px;font-weight:600;color:#1A202D;}
-        .doc-meta{font-size:11px;color:#7A9EAB;margin-top:1px;}
-
-        .main-content::-webkit-scrollbar{width:6px;}
-        .main-content::-webkit-scrollbar-thumb{background:rgba(80,184,184,0.2);border-radius:3px;}
-        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-        .fade-up{animation:fadeUp 0.5s ease forwards;opacity:0;}
-        .fade-up:nth-child(1){animation-delay:0.05s}.fade-up:nth-child(2){animation-delay:0.1s}.fade-up:nth-child(3){animation-delay:0.15s}.fade-up:nth-child(4){animation-delay:0.2s}
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1920">
+  <title>설계 정보 및 자산 관리 — PROMISE DT</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="../scripts/asset-ui.css" rel="stylesheet">
 </head>
 <body>
-    <script src="../scripts/shared-navbar.js"></script>
-
-    <div class="page-shell">
-        <nav class="lnb">
-            <div class="lnb-title">설계 정보·자산</div>
-            <div class="lnb-item active">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-                설비 대장
-            </div>
-            <div class="lnb-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                도면·문서
-            </div>
-            <div class="lnb-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-                정비 이력
-            </div>
-            <div class="lnb-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
-                예비품 관리
-            </div>
-            <div class="lnb-divider"></div>
-            <div class="lnb-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>
-                설계 사양
-            </div>
-        </nav>
-
-        <div class="main-content">
-            <div class="page-hdr fade-up">
-                <div>
-                    <h1>설계 정보·자산 관리</h1>
-                    <div class="page-hdr-sub">설비 대장 · 도면·문서 · 정비 이력 · 예비품 관리</div>
-                </div>
-                <div style="display:flex;gap:8px;">
-                    <button class="btn">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                        엑셀 내보내기
-                    </button>
-                    <button class="btn btn-primary">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        설비 등록
-                    </button>
-                </div>
-            </div>
-
-            <!-- KPI -->
-            <div class="kpi-strip fade-up">
-                <div class="kpi-card hl">
-                    <div class="kpi-label">총 등록 설비</div>
-                    <div><span class="kpi-val">42</span><span class="kpi-unit">건</span></div>
-                    <div class="kpi-meta"><span>주요 설비 10 · 부대설비 32</span></div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-label">도면·문서</div>
-                    <div><span class="kpi-val">128</span><span class="kpi-unit">건</span></div>
-                    <div class="kpi-meta"><span>P&ID 12 · 도면 48 · 기타 68</span></div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-label">금월 정비 건수</div>
-                    <div><span class="kpi-val">7</span><span class="kpi-unit">건</span></div>
-                    <div class="kpi-meta"><span>예방 5 · 사후 2</span></div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-label">예비품 부족</div>
-                    <div><span class="kpi-val" style="color:#F59E0B;">3</span><span class="kpi-unit">항목</span></div>
-                    <div class="kpi-meta"><span>발주 필요</span></div>
-                </div>
-            </div>
-
-            <!-- Search -->
-            <div class="search-bar fade-up">
-                <input class="search-input" placeholder="설비 TAG, 명칭, 제조사 검색...">
-                <button class="filter-btn">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                    필터
-                </button>
-            </div>
-
-            <!-- Asset table -->
-            <div class="card fade-up" style="margin-bottom:18px;">
-                <div class="card-body" style="padding:0;overflow-x:auto;">
-                    <table class="data-tbl">
-                        <thead>
-                            <tr>
-                                <th>TAG No.</th>
-                                <th>설비명</th>
-                                <th>제조사</th>
-                                <th>설치일</th>
-                                <th>공정</th>
-                                <th style="text-align:center;">상태</th>
-                                <th style="text-align:right;">가동시간(h)</th>
-                                <th style="text-align:right;">다음 정비</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td style="font-weight:700;color:#3978B8;">P-101</td><td>취수펌프</td><td>그런포스</td><td>2024-06-15</td><td>취수</td><td style="text-align:center;"><span class="status-badge ok"><span class="status-dot ok"></span>정상</span></td><td class="td-num">12,480</td><td class="td-num">D-45</td></tr>
-                            <tr><td style="font-weight:700;color:#3978B8;">F-101</td><td>DMF (다층여과)</td><td>대우엔텍</td><td>2024-06-15</td><td>전처리</td><td style="text-align:center;"><span class="status-badge ok"><span class="status-dot ok"></span>정상</span></td><td class="td-num">12,480</td><td class="td-num">D-30</td></tr>
-                            <tr><td style="font-weight:700;color:#3978B8;">F-102</td><td>SF (모래여과)</td><td>대우엔텍</td><td>2024-06-15</td><td>전처리</td><td style="text-align:center;"><span class="status-badge ok"><span class="status-dot ok"></span>정상</span></td><td class="td-num">12,480</td><td class="td-num">D-30</td></tr>
-                            <tr style="background:rgba(239,68,68,0.03);"><td style="font-weight:700;color:#EF4444;">P-202</td><td>고압펌프</td><td>댄포스</td><td>2024-06-15</td><td>RO</td><td style="text-align:center;"><span class="status-badge crit"><span class="status-dot crit"></span>위험</span></td><td class="td-num">12,480</td><td class="td-num" style="color:#EF4444;font-weight:800;">긴급</td></tr>
-                            <tr style="background:rgba(245,158,11,0.03);"><td style="font-weight:700;color:#D97706;">RO-301</td><td>RO 멤브레인</td><td>도레이</td><td>2024-06-15</td><td>RO</td><td style="text-align:center;"><span class="status-badge warn"><span class="status-dot warn"></span>주의</span></td><td class="td-num">12,480</td><td class="td-num" style="color:#D97706;">D-3</td></tr>
-                            <tr><td style="font-weight:700;color:#3978B8;">ERD-01</td><td>에너지 회수장치</td><td>ERI</td><td>2024-06-15</td><td>RO</td><td style="text-align:center;"><span class="status-badge ok"><span class="status-dot ok"></span>정상</span></td><td class="td-num">12,480</td><td class="td-num">D-90</td></tr>
-                            <tr><td style="font-weight:700;color:#3978B8;">CP-01</td><td>약품주입 펌프</td><td>프로미넌트</td><td>2024-06-15</td><td>약품</td><td style="text-align:center;"><span class="status-badge ok"><span class="status-dot ok"></span>정상</span></td><td class="td-num">12,480</td><td class="td-num">D-60</td></tr>
-                            <tr><td style="font-weight:700;color:#3978B8;">T-101</td><td>원수 저장탱크</td><td>삼성EPC</td><td>2024-06-15</td><td>취수</td><td style="text-align:center;"><span class="status-badge ok"><span class="status-dot ok"></span>정상</span></td><td class="td-num">—</td><td class="td-num">D-180</td></tr>
-                            <tr><td style="font-weight:700;color:#3978B8;">T-201</td><td>생산수 저장탱크</td><td>삼성EPC</td><td>2024-06-15</td><td>후처리</td><td style="text-align:center;"><span class="status-badge ok"><span class="status-dot ok"></span>정상</span></td><td class="td-num">—</td><td class="td-num">D-180</td></tr>
-                            <tr><td style="font-weight:700;color:#7A9EAB;">V-01</td><td>안전밸브</td><td>한국밸브</td><td>2024-06-15</td><td>공통</td><td style="text-align:center;"><span class="status-badge idle"><span class="status-dot idle"></span>대기</span></td><td class="td-num">—</td><td class="td-num">D-365</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Detail + Docs -->
-            <div class="grid-2 fade-up">
-                <!-- 설비 상세 -->
-                <div class="card">
-                    <div class="card-hdr">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#50B8B8" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-                        <div><div class="card-title">P-202 고압펌프 상세</div><div class="card-sub">TAG 선택 시 상세 정보 표시</div></div>
-                    </div>
-                    <div class="card-body">
-                        <div class="asset-detail">
-                            <div class="detail-item"><div class="detail-label">TAG No.</div><div class="detail-val">P-202</div></div>
-                            <div class="detail-item"><div class="detail-label">설비명</div><div class="detail-val">고압펌프</div></div>
-                            <div class="detail-item"><div class="detail-label">제조사 / 모델</div><div class="detail-val">댄포스 / APP 26</div></div>
-                            <div class="detail-item"><div class="detail-label">용량</div><div class="detail-val">5.5 kW / 55 bar</div></div>
-                            <div class="detail-item"><div class="detail-label">설치일</div><div class="detail-val">2024-06-15</div></div>
-                            <div class="detail-item"><div class="detail-label">누적 가동</div><div class="detail-val">12,480 h</div></div>
-                            <div class="detail-item"><div class="detail-label">최근 정비일</div><div class="detail-val">2026-01-20</div></div>
-                            <div class="detail-item"><div class="detail-label">현재 상태</div><div class="detail-val" style="color:#EF4444;">⚠ 베어링 진동 이상</div></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 관련 문서 -->
-                <div class="card">
-                    <div class="card-hdr">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#50B8B8" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                        <div><div class="card-title">관련 도면·문서</div><div class="card-sub">P-202 연관 문서 6건</div></div>
-                    </div>
-                    <div class="card-body" style="padding:12px 18px;">
-                        <div class="doc-item">
-                            <div class="doc-icon dwg">DWG</div>
-                            <div><div class="doc-name">P-202 고압펌프 조립도</div><div class="doc-meta">DWG · 2.4 MB · 2024-05-20</div></div>
-                        </div>
-                        <div class="doc-item">
-                            <div class="doc-icon pdf">PDF</div>
-                            <div><div class="doc-name">댄포스 APP 26 매뉴얼</div><div class="doc-meta">PDF · 12.1 MB · 2024-06-01</div></div>
-                        </div>
-                        <div class="doc-item">
-                            <div class="doc-icon pdf">PDF</div>
-                            <div><div class="doc-name">P-202 정비 절차서 (SOP)</div><div class="doc-meta">PDF · 1.8 MB · 2025-11-10</div></div>
-                        </div>
-                        <div class="doc-item">
-                            <div class="doc-icon xls">XLS</div>
-                            <div><div class="doc-name">P-202 정비 이력 대장</div><div class="doc-meta">XLSX · 245 KB · 2026-01-20</div></div>
-                        </div>
-                        <div class="doc-item">
-                            <div class="doc-icon dwg">P&ID</div>
-                            <div><div class="doc-name">RO 공정 P&ID (Rev.3)</div><div class="doc-meta">DWG · 5.6 MB · 2024-05-15</div></div>
-                        </div>
-                        <div class="doc-item">
-                            <div class="doc-icon pdf">PDF</div>
-                            <div><div class="doc-name">베어링 교체 작업 지시서</div><div class="doc-meta">PDF · 420 KB · 2026-03-20 (신규)</div></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        document.querySelectorAll('.lnb-item').forEach(item=>{
-            item.addEventListener('click',()=>{
-                document.querySelectorAll('.lnb-item').forEach(x=>x.classList.remove('active'));
-                item.classList.add('active');
-            });
-        });
-    </script>
+  <div class="page-shell">
+    <aside class="lnb">
+      <div class="eyebrow">ASSET MANAGEMENT</div>
+      <nav id="asset-nav" aria-label="자산 관리 내부 메뉴"></nav>
+      <div class="side-note"><strong>예시 데이터 시제품</strong><p>설비와 예비 자산의 업무 흐름을 확인합니다. 밸브와 계측기는 태그 정보만 조회합니다.</p><p>이 브라우저에 데이터와 파일을 저장합니다. 브라우저 데이터를 삭제하면 보관 내용도 사라집니다. Web과 단일 HTML은 자동 동기화되지 않습니다.</p></div>
+      <label class="actor-label">입력 작업자명 <input id="actor" value="예시 작업자" maxlength="80" required></label>
+      <small>인증된 사용자 기록이 아닙니다.</small>
+      <button id="reset" class="danger">예시 데이터 초기화</button>
+      <button id="reload">저장 데이터 새로고침</button>
+    </aside>
+    <main>
+      <header><div><h1>설계 정보 및 자산 관리</h1><p>태그 위치와 실물 자산을 구분하여 설치부터 점검 이력까지 관리합니다.</p></div><span id="storage-status" role="status">저장소 연결 중</span></header>
+      <div id="notice" role="status" hidden></div>
+      <section id="summary" class="kpis" aria-label="자산 요약"></section>
+      <section id="workspace" aria-live="polite"></section>
+    </main>
+  </div>
+  <div id="modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-card"><header><h2 id="modal-title"></h2><button id="modal-close" aria-label="닫기">닫기</button></header><div id="modal-body"></div></div></div>
+  <script src="../scripts/shared-navbar.js"></script>
+  <script src="../scripts/version.js"></script>
+  <script src="../scripts/vendor/xlsx.full.min.js"></script>
+  <script src="../scripts/asset-store.js"></script>
+  <script src="../scripts/asset-domain.js"></script>
+  <script src="../scripts/asset-app.js"></script>
 </body>
 </html>

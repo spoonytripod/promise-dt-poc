@@ -47,7 +47,10 @@ FILES = {make_page_id(f): f for f in html_files}
 # 네비게이션 패치 맵: 파일명 → 페이지 ID
 NAV_MAP = {filename: page_id for page_id, filename in FILES.items()}
 
-GLB_PATH    = os.path.join(ROOT_DIR, 'models', 'concept.glb')
+GLB_PATH = next((p for p in [
+    os.path.join(ROOT_DIR, 'models', 'seperated_comp.glb'),
+    os.path.join(ROOT_DIR, 'models', 'concept.glb'),
+] if os.path.exists(p)), os.path.join(ROOT_DIR, 'models', 'concept.glb'))
 OUTPUT_PATH = os.path.join(ROOT_DIR, 'demo_standalone.html')
 
 # ── shared-navbar.js 인라인 로딩 ──────────────────────────────────────────
@@ -100,7 +103,8 @@ def inline_navbar_js(html: str) -> str:
     """<script src="shared-navbar.js"></script> 를 인라인 스크립트로 교체"""
     if not navbar_js_content:
         return html
-    inline_tag = f'<script>\n{navbar_js_content}\n</script>'
+    navbar_safe = re.sub(r'</script', lambda m: '<\\/' + m.group(0)[2:], navbar_js_content, flags=re.I)
+    inline_tag = f'<script>\n{navbar_safe}\n</script>'
     # src 속성의 따옴표 종류에 관계없이 교체
     html = html.replace('<script src="../scripts/shared-navbar.js"></script>', inline_tag)
     html = html.replace("<script src='../scripts/shared-navbar.js'></script>", inline_tag)
@@ -110,7 +114,8 @@ def inline_navbar_js(html: str) -> str:
 
     # version.js 인라인 삽입
     if version_js_content:
-        ver_tag = f'<script>\n{version_js_content}\n</script>'
+        version_safe = re.sub(r'</script', lambda m: '<\\/' + m.group(0)[2:], version_js_content, flags=re.I)
+        ver_tag = f'<script>\n{version_safe}\n</script>'
         html = html.replace('<script src="../scripts/version.js"></script>', ver_tag)
         html = html.replace('<script src="version.js"></script>', ver_tag)
 
@@ -129,7 +134,26 @@ def patch_nav(html: str) -> str:
         html = html.replace(f'window.location.href = "{filename}"', msg)
         html = html.replace(f"window.location.href='{filename}'", msg)
         html = html.replace(f'window.location.href="{filename}"', msg)
+    # 공통 메뉴는 변수 href로 이동하므로 정적 문자열 패치에 추가 대응
+    routes = json.dumps(NAV_MAP)
+    html = html.replace('window.location.href = href;',
+                        f"window.parent.postMessage({{type:'navigate',page:({routes})[href]}}, '*');")
     return html
+
+
+def inline_asset_dependencies(html: str) -> str:
+    """자산 관리 파일만 로컬 의존성을 내장합니다. 외부 CDN을 사용하지 않습니다."""
+    def script(match):
+        path = os.path.normpath(os.path.join(PAGES_DIR, match.group(1)))
+        with open(path, 'r', encoding='utf-8') as source:
+            code = source.read().replace('</script', '<\\/script')
+        return '<script>\n' + code + '\n</script>'
+
+    html = re.sub(r'<script src="(../scripts/(?:asset-[^"/]+|vendor/xlsx.full.min)\.js)"></script>', script, html)
+    with open(os.path.join(SCRIPT_DIR, 'asset-ui.css'), 'r', encoding='utf-8') as source:
+        html = html.replace('<link href="../scripts/asset-ui.css" rel="stylesheet">',
+                            '<style>' + source.read() + '</style>')
+    return html.replace('<head>', '<head><script>window.ASSET_STANDALONE_CLIENT=true;</script>', 1)
 
 
 # ── 각 페이지 로드 & 처리 ────────────────────────────────────────────────
@@ -148,8 +172,15 @@ for page_id, filename in FILES.items():
     # 로컬 이미지 임베드 (pages/ 기준 상대경로 해석)
     html = embed_images(html, PAGES_DIR)
 
+    # Blob URL에서도 활성 메뉴를 정확히 표시
+    html = html.replace('<head>', '<head><script>window.PROMISE_PAGE_FILE=' + json.dumps(filename) + ';</script>', 1)
+    if page_id == 'page_asset':
+        html = inline_asset_dependencies(html)
+
     # shared-navbar.js 인라인 삽입
     html = inline_navbar_js(html)
+    # 상단 메뉴 스크립트가 생성하는 로고도 내장
+    html = embed_images(html, PAGES_DIR)
 
     # 메인 페이지: GLB 3D 모델 임베드
     if page_id == 'main' and os.path.exists(GLB_PATH):
@@ -160,6 +191,7 @@ for page_id, filename in FILES.items():
         # 새 경로 (../models/) 및 레거시 경로 (models/) 모두 처리
         html = html.replace("loader.load('../models/concept.glb'", f"loader.load('{glb_uri}'")
         html = html.replace("loader.load('../models/seperated.glb'", f"loader.load('{glb_uri}'")
+        html = html.replace("loader.load('../models/seperated_comp.glb'", f"loader.load('{glb_uri}'")
         html = html.replace("loader.load('models/concept.glb'", f"loader.load('{glb_uri}'")
         print(f"  [embed] GLB ({len(glb_b64) // 1024} KB)")
     elif page_id == 'main':
@@ -198,6 +230,9 @@ for pid in processed:
     iframe_tags.append(f'  <iframe id="frame-{pid}" class="page-frame{active}"></iframe>')
 iframe_html = '\n'.join(iframe_tags)
 
+with open(os.path.join(SCRIPT_DIR, 'asset-store.js'), 'r', encoding='utf-8') as source:
+    asset_store_js = source.read().replace('</script', '<\\/script')
+
 wrapper = f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -222,6 +257,8 @@ wrapper = f"""<!DOCTYPE html>
 {iframe_html}
 
   <script>
+    {asset_store_js}
+    AssetStore.serve(document.getElementById('frame-page_asset'));
     /* ── 각 페이지 HTML → Blob URL → iframe.src ── */
     const PAGE_HTML = {{
 {page_html_js}
@@ -235,10 +272,12 @@ wrapper = f"""<!DOCTYPE html>
     /* ── 페이지 전환 라우터 (postMessage) ── */
     window.addEventListener('message', function (e) {{
       if (!e.data || e.data.type !== 'navigate') return;
+      if (![...document.querySelectorAll('.page-frame')].some(f => f.contentWindow === e.source)) return;
       const target = e.data.page;
-      document.querySelectorAll('.page-frame').forEach(f => f.classList.remove('active'));
       const frame = document.getElementById('frame-' + target);
-      if (frame) frame.classList.add('active');
+      if (!frame) return;
+      document.querySelectorAll('.page-frame').forEach(f => f.classList.remove('active'));
+      frame.classList.add('active');
     }});
   </script>
 </body>

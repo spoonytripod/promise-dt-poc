@@ -17,7 +17,7 @@
         { label: '운영 분석', href: 'page-analysis.html', icon: 'activity' },
         { label: '의사결정 지원', href: 'page-decision.html', icon: 'chat' },
         { label: '진단·고장예지', href: 'page-diagnostics.html', icon: 'alert' },
-        { label: '설계 정보·자산 관리', href: 'page-asset.html', icon: 'wrench' },
+        { label: '설계 정보 및 자산 관리', href: 'page-asset.html', icon: 'wrench' },
         { sep: true },
         { label: '환경 설정', href: '#', icon: 'settings' },
         { label: '도움말', href: '#', icon: 'help' },
@@ -37,7 +37,7 @@
     };
 
     /* ── 현재 페이지 감지 ────────────────────────── */
-    const currentFile = window.location.pathname.split('/').pop() || 'main.html';
+    const currentFile = window.PROMISE_PAGE_FILE || window.location.pathname.split('/').pop() || 'main.html';
 
     /* ── HTML 빌드 ────────────────────────────────── */
     function buildDockHTML() {

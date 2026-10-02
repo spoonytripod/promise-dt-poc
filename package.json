@@ -1,0 +1,11 @@
+{
+  "name": "promise-dt-prototype-checks",
+  "private": true,
+  "description": "정적 HTML 시제품의 검증 도구. 실행 화면은 프레임워크와 빌드에 의존하지 않습니다.",
+  "scripts": {
+    "test": "node scripts/test-asset-domain.cjs",
+    "test:storage": "node scripts/test-asset-storage.cjs",
+    "test:browser": "node scripts/test-asset-browser.cjs"
+  },
+  "devDependencies": { "playwright": "1.63.0" }
+}
